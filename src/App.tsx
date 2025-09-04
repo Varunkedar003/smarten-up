@@ -3,14 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthPage } from "./components/auth/AuthPage";
-import { DashboardLayout } from "./components/layout/DashboardLayout";
-import { Dashboard } from "./pages/Dashboard";
-import { LearningGames } from "./pages/LearningGames";
-import { AIAssistant } from "./pages/AIAssistant";
-import { Progress } from "./pages/Progress";
-import { Achievements } from "./pages/Achievements";
-import NotFound from "./pages/NotFound";
+import { AuthPage } from "@/components/auth/AuthPage";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Dashboard } from "@/pages/Dashboard";
+import { LearningGames } from "@/pages/LearningGames";
+import { AIAssistant } from "@/pages/AIAssistant";
+import { Progress } from "@/pages/Progress";
+import { Achievements } from "@/pages/Achievements";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
