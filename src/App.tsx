@@ -10,6 +10,7 @@ import { LearningGames } from "@/pages/LearningGames";
 import { AIAssistant } from "@/pages/AIAssistant";
 import { Progress } from "@/pages/Progress";
 import { Achievements } from "@/pages/Achievements";
+import { GamePlayer } from "@/pages/GamePlayer";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
           <Route path="/learning" element={<DashboardLayout><LearningGames /></DashboardLayout>} />
+          <Route path="/learning/play" element={<DashboardLayout><GamePlayer /></DashboardLayout>} />
           <Route path="/assistant" element={<DashboardLayout><AIAssistant /></DashboardLayout>} />
           <Route path="/progress" element={<DashboardLayout><Progress /></DashboardLayout>} />
           <Route path="/achievements" element={<DashboardLayout><Achievements /></DashboardLayout>} />

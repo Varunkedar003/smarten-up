@@ -15,6 +15,8 @@ import {
   Play,
   ChevronRight
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { recordGameStart } from "@/lib/progress";
 
 type DifficultyLevel = "easy" | "intermediate" | "hard";
 type Subject = "mathematics" | "science" | "language" | "history";
@@ -150,6 +152,7 @@ const subjectsData: Record<Subject, SubjectData> = {
 };
 
 export const LearningGames = () => {
+  const navigate = useNavigate();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
@@ -157,8 +160,14 @@ export const LearningGames = () => {
 
   const handleStartGame = () => {
     if (selectedSubject && selectedTopic && selectedSubtopic && selectedLevel) {
-      // Here you would navigate to the actual game component
-      console.log("Starting game:", { selectedSubject, selectedTopic, selectedSubtopic, selectedLevel });
+      const selection = {
+        subject: selectedSubject,
+        topic: selectedTopic.name,
+        subtopic: selectedSubtopic,
+        level: selectedLevel,
+      } as const;
+      recordGameStart(selection);
+      navigate("/learning/play", { state: { selection } });
     }
   };
 

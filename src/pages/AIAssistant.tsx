@@ -119,7 +119,20 @@ export const AIAssistant = () => {
       
       // If no predefined response, generate a helpful default
       if (aiResponse.startsWith("I understand your question")) {
-        if (lowercaseContent.includes("math") || lowercaseContent.includes("calculate")) {
+        // data structures common topics
+        if (lowercaseContent.includes("array")) {
+          aiResponse = "Arrays are contiguous collections of items of the same type, accessed by index (0‑based). Key ops: access O(1), update O(1), push/pop end O(1) amortized, insert/delete middle O(n). Pitfalls: fixed size in low‑level langs, out‑of‑bounds, shifting costs. Uses: lookup tables, buffers, dynamic arrays. Want examples in JS or Python?";
+        } else if (lowercaseContent.includes("stack")) {
+          aiResponse = "Stacks are LIFO structures. Ops: push, pop, peek. Uses: undo, recursion, parsing. Implement with arrays or linked lists. Complexity: O(1) for core ops.";
+        } else if (lowercaseContent.includes("queue")) {
+          aiResponse = "Queues are FIFO structures. Ops: enqueue, dequeue, front. Variants: deque, priority queue. Uses: scheduling, BFS. Complexity: O(1) with circular buffer/deque.";
+        } else if (lowercaseContent.includes("linked list")) {
+          aiResponse = "Linked lists are nodes with pointers. Pros: O(1) insertion/deletion given node. Cons: O(n) indexing, extra memory. Variants: singly, doubly, circular.";
+        } else if (lowercaseContent.includes("tree") || lowercaseContent.includes("bst")) {
+          aiResponse = "Trees organize data hierarchically. BST keeps left<node<right; search/insert/delete O(log n) average if balanced. Variants: AVL, Red‑Black, heaps, tries.";
+        } else if (lowercaseContent.includes("graph")) {
+          aiResponse = "Graphs model relationships: vertices + edges. Reps: adjacency list/matrix. Traversals: DFS/BFS. Problems: shortest path, connectivity, cycles.";
+        } else if (lowercaseContent.includes("math") || lowercaseContent.includes("calculate")) {
           aiResponse = "I'd be happy to help with your math question! Could you provide more specific details about what you're working on? Whether it's algebra, geometry, calculus, or basic arithmetic, I can break it down step by step for you. 📊";
         } else if (lowercaseContent.includes("science") || lowercaseContent.includes("biology") || lowercaseContent.includes("chemistry") || lowercaseContent.includes("physics")) {
           aiResponse = "Science is fascinating! I can explain concepts from biology, chemistry, physics, and earth science. What specific topic or concept would you like me to break down for you? I'll make sure to explain it clearly with examples! 🔬";
