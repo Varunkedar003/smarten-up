@@ -6,11 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Brain, Star, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", name: "" });
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ export const AuthPage = () => {
     // Simulate login - In real app, use Supabase auth
     setTimeout(() => {
       toast.success("Welcome back to LearnReinforced!");
-      // Navigate to dashboard
+      navigate("/dashboard");
       setIsLoading(false);
     }, 1500);
   };
@@ -31,6 +33,7 @@ export const AuthPage = () => {
     // Simulate signup - In real app, use Supabase auth
     setTimeout(() => {
       toast.success("Welcome to LearnReinforced! Let's start learning!");
+      navigate("/dashboard");
       setIsLoading(false);
     }, 1500);
   };
