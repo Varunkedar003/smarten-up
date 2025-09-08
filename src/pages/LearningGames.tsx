@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { recordGameStart } from "@/lib/progress";
 
 type DifficultyLevel = "easy" | "intermediate" | "hard";
-type Subject = "Computer Science" | "Engineering";
+type Subject = "Computer Science" | "Engineering" | "Mathematics" | "Physics" | "Chemistry" | "Biology" | "Geography" | "Art & Design" | "Music Theory" | "Literature" | "Language Learning" | "Business Studies";
 
 interface Topic {
   id: string;
@@ -34,6 +34,20 @@ interface SubjectData {
   topics: Topic[];
 }
 
+import { 
+  Calculator, 
+  Atom, 
+  Dna,
+  Globe,
+  Palette,
+  Music,
+  BookOpen,
+  Languages,
+  TrendingUp,
+  Camera
+} from "lucide-react";
+
+
 const subjectsData: Record<Subject, SubjectData> = {
   "Computer Science": {
     name: "Computer Science",
@@ -43,23 +57,30 @@ const subjectsData: Record<Subject, SubjectData> = {
       {
         id: "algorithms",
         name: "Algorithms",
-        description: "Sorting, graph traversal, and problem solving",
+        description: "Sorting, searching, graph algorithms, and optimization",
         progress: 35,
-        subtopics: ["Sorting", "Graphs", "Dynamic Programming", "Greedy"]
+        subtopics: ["Sorting", "Searching", "Graph Traversal", "Dynamic Programming", "Greedy Algorithms", "Divide & Conquer"]
       },
       {
         id: "data-structures",
         name: "Data Structures",
-        description: "Arrays, stacks, queues, trees, and hash maps",
+        description: "Arrays, trees, graphs, hash tables, and advanced structures",
         progress: 50,
-        subtopics: ["Arrays & Lists", "Stacks & Queues", "Trees", "Hash Tables"]
+        subtopics: ["Arrays & Lists", "Stacks & Queues", "Trees", "Hash Tables", "Graphs", "Heaps"]
       },
       {
         id: "programming",
         name: "Programming",
-        description: "Syntax, debugging, and paradigms",
+        description: "Languages, paradigms, debugging, and best practices",
         progress: 20,
-        subtopics: ["Syntax & Basics", "Debugging", "OOP", "Functional Programming"]
+        subtopics: ["Syntax & Basics", "Debugging", "OOP", "Functional Programming", "Design Patterns", "Code Optimization"]
+      },
+      {
+        id: "databases",
+        name: "Database Management",
+        description: "SQL, NoSQL, database design, and optimization",
+        progress: 15,
+        subtopics: ["SQL Fundamentals", "Database Design", "Normalization", "Indexing", "NoSQL", "Query Optimization"]
       }
     ]
   },
@@ -71,23 +92,338 @@ const subjectsData: Record<Subject, SubjectData> = {
       {
         id: "digital-logic",
         name: "Digital Logic",
-        description: "Logic gates and digital circuits",
+        description: "Logic gates, circuits, and digital system design",
         progress: 45,
-        subtopics: ["Basic Gates", "Combinational Circuits", "Sequential Logic", "Karnaugh Maps"]
+        subtopics: ["Basic Gates", "Boolean Algebra", "Combinational Circuits", "Sequential Logic", "Flip-Flops", "Karnaugh Maps"]
       },
       {
         id: "computer-networks",
         name: "Computer Networks",
-        description: "Routing, protocols, and security",
+        description: "Protocols, routing, network security, and architecture",
         progress: 30,
-        subtopics: ["OSI Model", "Routing", "TCP/IP", "Network Security"]
+        subtopics: ["OSI Model", "TCP/IP", "Routing Protocols", "Network Security", "Wireless Networks", "Network Troubleshooting"]
       },
       {
-        id: "database-systems",
-        name: "Database Systems",
-        description: "SQL, normalization, and transactions",
+        id: "software-engineering",
+        name: "Software Engineering",
+        description: "Development methodologies, testing, and project management",
         progress: 25,
-        subtopics: ["SQL Basics", "Normalization", "Indexing", "Transactions"]
+        subtopics: ["SDLC", "Agile Methodology", "Testing Strategies", "Version Control", "Code Review", "Project Management"]
+      },
+      {
+        id: "systems-design",
+        name: "Systems Design",
+        description: "Scalable systems, architecture patterns, and performance",
+        progress: 10,
+        subtopics: ["System Architecture", "Load Balancing", "Caching", "Microservices", "Database Scaling", "Performance Optimization"]
+      }
+    ]
+  },
+  "Mathematics": {
+    name: "Mathematics",
+    icon: Calculator,
+    color: "from-purple-500 to-purple-600",
+    topics: [
+      {
+        id: "algebra",
+        name: "Algebra",
+        description: "Linear equations, polynomials, and algebraic structures",
+        progress: 60,
+        subtopics: ["Linear Equations", "Quadratic Equations", "Polynomials", "Factoring", "Systems of Equations", "Inequalities"]
+      },
+      {
+        id: "geometry",
+        name: "Geometry",
+        description: "Shapes, angles, area, volume, and geometric proofs",
+        progress: 40,
+        subtopics: ["Triangles", "Circles", "Polygons", "3D Shapes", "Coordinate Geometry", "Trigonometry"]
+      },
+      {
+        id: "calculus",
+        name: "Calculus",
+        description: "Limits, derivatives, integrals, and applications",
+        progress: 25,
+        subtopics: ["Limits", "Derivatives", "Integration", "Applications", "Series", "Differential Equations"]
+      },
+      {
+        id: "statistics",
+        name: "Statistics & Probability",
+        description: "Data analysis, probability, and statistical inference",
+        progress: 55,
+        subtopics: ["Descriptive Statistics", "Probability", "Distributions", "Hypothesis Testing", "Regression", "Data Visualization"]
+      }
+    ]
+  },
+  "Physics": {
+    name: "Physics",
+    icon: Atom,
+    color: "from-blue-500 to-blue-600",
+    topics: [
+      {
+        id: "mechanics",
+        name: "Classical Mechanics",
+        description: "Motion, forces, energy, and momentum",
+        progress: 45,
+        subtopics: ["Kinematics", "Forces", "Energy", "Momentum", "Circular Motion", "Simple Harmonic Motion"]
+      },
+      {
+        id: "electricity",
+        name: "Electricity & Magnetism",
+        description: "Electric fields, circuits, magnetic fields, and waves",
+        progress: 35,
+        subtopics: ["Electric Fields", "Circuits", "Magnetic Fields", "Electromagnetic Induction", "AC/DC", "Maxwell's Equations"]
+      },
+      {
+        id: "thermodynamics",
+        name: "Thermodynamics",
+        description: "Heat, temperature, and energy transformations",
+        progress: 20,
+        subtopics: ["Temperature & Heat", "Laws of Thermodynamics", "Gas Laws", "Phase Changes", "Heat Engines", "Entropy"]
+      },
+      {
+        id: "modern-physics",
+        name: "Modern Physics",
+        description: "Quantum mechanics, relativity, and atomic structure",
+        progress: 15,
+        subtopics: ["Quantum Theory", "Atomic Structure", "Special Relativity", "Nuclear Physics", "Particle Physics", "Wave-Particle Duality"]
+      }
+    ]
+  },
+  "Chemistry": {
+    name: "Chemistry",
+    icon: Atom,
+    color: "from-green-500 to-green-600",
+    topics: [
+      {
+        id: "atomic-structure",
+        name: "Atomic Structure",
+        description: "Atoms, electrons, periodic table, and chemical bonding",
+        progress: 50,
+        subtopics: ["Atomic Theory", "Electron Configuration", "Periodic Trends", "Chemical Bonding", "Molecular Geometry", "Intermolecular Forces"]
+      },
+      {
+        id: "chemical-reactions",
+        name: "Chemical Reactions",
+        description: "Reaction types, stoichiometry, and reaction mechanisms",
+        progress: 40,
+        subtopics: ["Reaction Types", "Balancing Equations", "Stoichiometry", "Reaction Rates", "Equilibrium", "Acid-Base Reactions"]
+      },
+      {
+        id: "organic-chemistry",
+        name: "Organic Chemistry",
+        description: "Carbon compounds, functional groups, and mechanisms",
+        progress: 25,
+        subtopics: ["Hydrocarbons", "Functional Groups", "Isomerism", "Reaction Mechanisms", "Polymers", "Biomolecules"]
+      },
+      {
+        id: "physical-chemistry",
+        name: "Physical Chemistry",
+        description: "Thermodynamics, kinetics, and quantum chemistry",
+        progress: 20,
+        subtopics: ["Thermodynamics", "Chemical Kinetics", "Electrochemistry", "Phase Diagrams", "Spectroscopy", "Quantum Chemistry"]
+      }
+    ]
+  },
+  "Biology": {
+    name: "Biology",
+    icon: Dna,
+    color: "from-emerald-500 to-emerald-600",
+    topics: [
+      {
+        id: "cell-biology",
+        name: "Cell Biology",
+        description: "Cell structure, organelles, and cellular processes",
+        progress: 55,
+        subtopics: ["Cell Structure", "Organelles", "Cell Membrane", "Cell Division", "Cellular Respiration", "Photosynthesis"]
+      },
+      {
+        id: "genetics",
+        name: "Genetics",
+        description: "DNA, heredity, gene expression, and biotechnology",
+        progress: 30,
+        subtopics: ["DNA Structure", "Gene Expression", "Mendel's Laws", "Genetic Disorders", "Biotechnology", "Evolution"]
+      },
+      {
+        id: "ecology",
+        name: "Ecology",
+        description: "Ecosystems, biodiversity, and environmental interactions",
+        progress: 35,
+        subtopics: ["Food Chains", "Ecosystems", "Population Dynamics", "Biodiversity", "Conservation", "Climate Change"]
+      },
+      {
+        id: "human-biology",
+        name: "Human Biology",
+        description: "Anatomy, physiology, and human body systems",
+        progress: 45,
+        subtopics: ["Circulatory System", "Nervous System", "Digestive System", "Respiratory System", "Immune System", "Reproduction"]
+      }
+    ]
+  },
+  "Geography": {
+    name: "Geography",
+    icon: Globe,
+    color: "from-amber-500 to-amber-600",
+    topics: [
+      {
+        id: "physical-geography",
+        name: "Physical Geography",
+        description: "Landforms, climate, weather, and natural processes",
+        progress: 40,
+        subtopics: ["Landforms", "Climate Zones", "Weather Patterns", "Plate Tectonics", "Rivers & Oceans", "Natural Disasters"]
+      },
+      {
+        id: "human-geography",
+        name: "Human Geography",
+        description: "Population, cities, culture, and economic geography",
+        progress: 35,
+        subtopics: ["Population Studies", "Urbanization", "Cultural Geography", "Economic Activities", "Migration", "Globalization"]
+      },
+      {
+        id: "map-skills",
+        name: "Map Skills & GIS",
+        description: "Map reading, coordinates, and geographic information systems",
+        progress: 50,
+        subtopics: ["Map Reading", "Coordinates", "Scale & Direction", "GIS Basics", "Remote Sensing", "Spatial Analysis"]
+      }
+    ]
+  },
+  "Art & Design": {
+    name: "Art & Design",
+    icon: Palette,
+    color: "from-pink-500 to-pink-600",
+    topics: [
+      {
+        id: "visual-arts",
+        name: "Visual Arts",
+        description: "Drawing, painting, color theory, and composition",
+        progress: 30,
+        subtopics: ["Drawing Techniques", "Color Theory", "Composition", "Perspective", "Shading & Light", "Art History"]
+      },
+      {
+        id: "digital-design",
+        name: "Digital Design",
+        description: "Graphic design, UI/UX, and digital art techniques",
+        progress: 25,
+        subtopics: ["Graphic Design", "UI/UX Design", "Digital Illustration", "Typography", "Logo Design", "Web Design"]
+      },
+      {
+        id: "photography",
+        name: "Photography",
+        description: "Camera techniques, composition, and photo editing",
+        progress: 20,
+        subtopics: ["Camera Basics", "Composition Rules", "Lighting", "Photo Editing", "Portrait Photography", "Landscape Photography"]
+      }
+    ]
+  },
+  "Music Theory": {
+    name: "Music Theory",
+    icon: Music,
+    color: "from-violet-500 to-violet-600",
+    topics: [
+      {
+        id: "fundamentals",
+        name: "Music Fundamentals",
+        description: "Notes, scales, intervals, and basic music reading",
+        progress: 45,
+        subtopics: ["Musical Notes", "Scales", "Key Signatures", "Time Signatures", "Intervals", "Chord Basics"]
+      },
+      {
+        id: "harmony",
+        name: "Harmony & Composition",
+        description: "Chord progressions, voice leading, and songwriting",
+        progress: 25,
+        subtopics: ["Chord Progressions", "Voice Leading", "Cadences", "Modulation", "Song Structure", "Counterpoint"]
+      },
+      {
+        id: "rhythm",
+        name: "Rhythm & Meter",
+        description: "Beat, tempo, rhythmic patterns, and syncopation",
+        progress: 35,
+        subtopics: ["Beat & Tempo", "Rhythmic Patterns", "Syncopation", "Polyrhythm", "Meter Changes", "Groove"]
+      }
+    ]
+  },
+  "Literature": {
+    name: "Literature",
+    icon: BookOpen,
+    color: "from-stone-500 to-stone-600",
+    topics: [
+      {
+        id: "poetry",
+        name: "Poetry Analysis",
+        description: "Poetic devices, forms, themes, and interpretation",
+        progress: 40,
+        subtopics: ["Poetic Devices", "Rhyme & Meter", "Poetry Forms", "Theme Analysis", "Symbolism", "Historical Context"]
+      },
+      {
+        id: "prose",
+        name: "Prose & Fiction",
+        description: "Narrative techniques, character development, and themes",
+        progress: 30,
+        subtopics: ["Narrative Structure", "Character Analysis", "Setting & Atmosphere", "Theme & Symbolism", "Literary Devices", "Genre Studies"]
+      },
+      {
+        id: "drama",
+        name: "Drama & Theater",
+        description: "Dramatic structure, performance, and theatrical elements",
+        progress: 20,
+        subtopics: ["Dramatic Structure", "Character Development", "Dialogue", "Stage Directions", "Theater History", "Performance Analysis"]
+      }
+    ]
+  },
+  "Language Learning": {
+    name: "Language Learning",
+    icon: Languages,
+    color: "from-red-500 to-red-600",
+    topics: [
+      {
+        id: "vocabulary",
+        name: "Vocabulary Building",
+        description: "Word learning, etymology, and vocabulary expansion",
+        progress: 50,
+        subtopics: ["Basic Vocabulary", "Word Families", "Etymology", "Synonyms & Antonyms", "Idioms", "Academic Vocabulary"]
+      },
+      {
+        id: "grammar",
+        name: "Grammar & Syntax",
+        description: "Sentence structure, parts of speech, and language rules",
+        progress: 35,
+        subtopics: ["Parts of Speech", "Sentence Structure", "Verb Tenses", "Punctuation", "Clauses", "Grammar Rules"]
+      },
+      {
+        id: "conversation",
+        name: "Conversation Skills",
+        description: "Speaking, listening, pronunciation, and communication",
+        progress: 25,
+        subtopics: ["Pronunciation", "Listening Skills", "Conversation Starters", "Cultural Context", "Accent Training", "Public Speaking"]
+      }
+    ]
+  },
+  "Business Studies": {
+    name: "Business Studies",
+    icon: TrendingUp,
+    color: "from-orange-500 to-orange-600",
+    topics: [
+      {
+        id: "economics",
+        name: "Economics",
+        description: "Supply and demand, markets, and economic principles",
+        progress: 30,
+        subtopics: ["Supply & Demand", "Market Types", "Inflation", "GDP", "International Trade", "Economic Indicators"]
+      },
+      {
+        id: "marketing",
+        name: "Marketing",
+        description: "Market research, advertising, and consumer behavior",
+        progress: 25,
+        subtopics: ["Market Research", "Marketing Mix", "Consumer Behavior", "Digital Marketing", "Brand Management", "Sales Strategies"]
+      },
+      {
+        id: "finance",
+        name: "Finance & Accounting",
+        description: "Financial statements, budgeting, and investment principles",
+        progress: 20,
+        subtopics: ["Financial Statements", "Budgeting", "Investment Basics", "Risk Management", "Cash Flow", "Financial Planning"]
       }
     ]
   }

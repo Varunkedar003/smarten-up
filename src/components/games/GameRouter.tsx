@@ -6,6 +6,11 @@ import { CircuitBuilder } from './CircuitBuilder';
 import { CodeDebugging } from './CodeDebugging';
 import { NetworkSimulator } from './NetworkSimulator';
 import { DatabaseDesigner } from './DatabaseDesigner';
+import { MathEquationSolver } from './MathEquationSolver';
+import { PhysicsSimulator } from './PhysicsSimulator';
+import { ChemistryLab } from './ChemistryLab';
+import { BiologyExplorer } from './BiologyExplorer';
+import { GeographyExplorer } from './GeographyExplorer';
 
 interface GameRouterProps {
   selection: GameSelection;
@@ -14,7 +19,7 @@ interface GameRouterProps {
 
 export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete }) => {
   const getGameForSelection = () => {
-    const { subject, topic, level } = selection;
+    const { subject, topic, subtopic, level } = selection;
 
     // Computer Science games
     if (subject === "Computer Science") {
@@ -25,6 +30,8 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           return <DataStructureBuilder level={level} onComplete={onComplete} />;
         case "Programming":
           return <CodeDebugging level={level} onComplete={onComplete} />;
+        case "Database Management":
+          return <DatabaseDesigner level={level} onComplete={onComplete} />;
         default:
           return <AlgorithmVisualizer level={level} onComplete={onComplete} />;
       }
@@ -37,14 +44,40 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           return <CircuitBuilder level={level} onComplete={onComplete} />;
         case "Computer Networks":
           return <NetworkSimulator level={level} onComplete={onComplete} />;
-        case "Database Systems":
-          return <DatabaseDesigner level={level} onComplete={onComplete} />;
+        case "Software Engineering":
+        case "Systems Design":
+          return <CodeDebugging level={level} onComplete={onComplete} />;
         default:
           return <CircuitBuilder level={level} onComplete={onComplete} />;
       }
     }
 
-    // Default fallback
+    // Mathematics games
+    if (subject === "Mathematics") {
+      return <MathEquationSolver level={level} subtopic={subtopic} onComplete={onComplete} />;
+    }
+
+    // Physics games
+    if (subject === "Physics") {
+      return <PhysicsSimulator level={level} subtopic={subtopic} onComplete={onComplete} />;
+    }
+
+    // Chemistry games
+    if (subject === "Chemistry") {
+      return <ChemistryLab level={level} subtopic={subtopic} onComplete={onComplete} />;
+    }
+
+    // Biology games
+    if (subject === "Biology") {
+      return <BiologyExplorer level={level} subtopic={subtopic} onComplete={onComplete} />;
+    }
+
+    // Geography games
+    if (subject === "Geography") {
+      return <GeographyExplorer level={level} subtopic={subtopic} onComplete={onComplete} />;
+    }
+
+    // Other subjects - use appropriate fallbacks
     return <AlgorithmVisualizer level={level} onComplete={onComplete} />;
   };
 
