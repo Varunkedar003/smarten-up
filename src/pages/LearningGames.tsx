@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Calculator, 
-  Atom, 
-  BookOpen, 
-  Globe, 
+  Cpu, 
+  CircuitBoard,
   Gamepad2,
   Star,
   Zap,
@@ -19,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { recordGameStart } from "@/lib/progress";
 
 type DifficultyLevel = "easy" | "intermediate" | "hard";
-type Subject = "mathematics" | "science" | "language" | "history";
+type Subject = "Computer Science" | "Engineering";
 
 interface Topic {
   id: string;
@@ -37,115 +35,59 @@ interface SubjectData {
 }
 
 const subjectsData: Record<Subject, SubjectData> = {
-  mathematics: {
-    name: "Mathematics",
-    icon: Calculator,
-    color: "from-blue-500 to-blue-600",
+  "Computer Science": {
+    name: "Computer Science",
+    icon: Cpu,
+    color: "from-indigo-500 to-indigo-600",
     topics: [
       {
-        id: "algebra",
-        name: "Algebra",
-        description: "Variables, equations, and expressions",
-        progress: 75,
-        subtopics: ["Linear Equations", "Quadratic Equations", "Inequalities", "Systems of Equations"]
+        id: "algorithms",
+        name: "Algorithms",
+        description: "Sorting, graph traversal, and problem solving",
+        progress: 35,
+        subtopics: ["Sorting", "Graphs", "Dynamic Programming", "Greedy"]
       },
       {
-        id: "geometry",
-        name: "Geometry",
-        description: "Shapes, angles, and spatial relationships",
-        progress: 45,
-        subtopics: ["Basic Shapes", "Area & Perimeter", "Angles", "Triangles", "Circles"]
+        id: "data-structures",
+        name: "Data Structures",
+        description: "Arrays, stacks, queues, trees, and hash maps",
+        progress: 50,
+        subtopics: ["Arrays & Lists", "Stacks & Queues", "Trees", "Hash Tables"]
       },
       {
-        id: "calculus",
-        name: "Calculus",
-        description: "Derivatives and integrals",
+        id: "programming",
+        name: "Programming",
+        description: "Syntax, debugging, and paradigms",
         progress: 20,
-        subtopics: ["Limits", "Derivatives", "Integration", "Applications"]
+        subtopics: ["Syntax & Basics", "Debugging", "OOP", "Functional Programming"]
       }
     ]
   },
-  science: {
-    name: "Science",
-    icon: Atom,
-    color: "from-green-500 to-green-600",
+  "Engineering": {
+    name: "Engineering",
+    icon: CircuitBoard,
+    color: "from-teal-500 to-teal-600",
     topics: [
       {
-        id: "physics",
-        name: "Physics",
-        description: "Motion, forces, and energy",
-        progress: 60,
-        subtopics: ["Motion", "Forces", "Energy", "Waves", "Electricity"]
+        id: "digital-logic",
+        name: "Digital Logic",
+        description: "Logic gates and digital circuits",
+        progress: 45,
+        subtopics: ["Basic Gates", "Combinational Circuits", "Sequential Logic", "Karnaugh Maps"]
       },
       {
-        id: "chemistry",
-        name: "Chemistry",
-        description: "Atoms, molecules, and reactions",
+        id: "computer-networks",
+        name: "Computer Networks",
+        description: "Routing, protocols, and security",
         progress: 30,
-        subtopics: ["Atomic Structure", "Chemical Bonds", "Reactions", "Solutions"]
+        subtopics: ["OSI Model", "Routing", "TCP/IP", "Network Security"]
       },
       {
-        id: "biology",
-        name: "Biology",
-        description: "Living organisms and life processes",
-        progress: 85,
-        subtopics: ["Cell Biology", "Genetics", "Evolution", "Ecology"]
-      }
-    ]
-  },
-  language: {
-    name: "Language Arts",
-    icon: BookOpen,
-    color: "from-purple-500 to-purple-600",
-    topics: [
-      {
-        id: "grammar",
-        name: "Grammar",
-        description: "Sentence structure and rules",
-        progress: 90,
-        subtopics: ["Parts of Speech", "Sentence Types", "Punctuation", "Subject-Verb Agreement"]
-      },
-      {
-        id: "reading",
-        name: "Reading Comprehension",
-        description: "Understanding and analyzing texts",
-        progress: 70,
-        subtopics: ["Main Ideas", "Inference", "Text Analysis", "Vocabulary"]
-      },
-      {
-        id: "writing",
-        name: "Creative Writing",
-        description: "Expressing ideas through written word",
-        progress: 55,
-        subtopics: ["Narrative Writing", "Persuasive Writing", "Poetry", "Essays"]
-      }
-    ]
-  },
-  history: {
-    name: "History",
-    icon: Globe,
-    color: "from-orange-500 to-orange-600",
-    topics: [
-      {
-        id: "ancient",
-        name: "Ancient Civilizations",
-        description: "Early human societies and cultures",
-        progress: 40,
-        subtopics: ["Mesopotamia", "Ancient Egypt", "Greece", "Rome"]
-      },
-      {
-        id: "medieval",
-        name: "Medieval Period",
-        description: "Middle Ages and feudal systems",
+        id: "database-systems",
+        name: "Database Systems",
+        description: "SQL, normalization, and transactions",
         progress: 25,
-        subtopics: ["Feudalism", "Crusades", "Renaissance", "Reformation"]
-      },
-      {
-        id: "modern",
-        name: "Modern History",
-        description: "Industrial revolution to present",
-        progress: 65,
-        subtopics: ["Industrial Revolution", "World Wars", "Cold War", "Contemporary Era"]
+        subtopics: ["SQL Basics", "Normalization", "Indexing", "Transactions"]
       }
     ]
   }
