@@ -94,6 +94,7 @@ const subjectsData: Record<Subject, SubjectData> = {
 };
 
 export const LearningGames = () => {
+  // Updated subjects: Computer Science & Engineering
   const navigate = useNavigate();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
@@ -131,14 +132,15 @@ export const LearningGames = () => {
 
   // Subject Selection
   if (!selectedSubject) {
+    const timestamp = Date.now(); // Force fresh render
     return (
-      <div className="space-y-6">
+      <div className="space-y-6" key={`subjects-${timestamp}`}>
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">Choose Your Subject</h1>
           <p className="text-muted-foreground">Select a subject to start your learning adventure</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" key="cs-eng-subjects">
           {Object.entries(subjectsData).map(([key, subject]) => {
             const Icon = subject.icon;
             return (
