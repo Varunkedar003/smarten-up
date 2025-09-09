@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,20 +105,45 @@ function NodeView({ node, depth = 0 }: { node: RoadNode; depth?: number }) {
 }
 
 export const Roadmap = () => {
+  const [topicInput, setTopicInput] = useState('Python Programming');
+  const [levelInput, setLevelInput] = useState<Level>('beginner');
   const [topic, setTopic] = useState('Python Programming');
   const [level, setLevel] = useState<Level>('beginner');
-  const data = useMemo(() => generateRoadmap(topic, level), [topic, level]);
+  const [data, setData] = useState<RoadNode>(() => generateRoadmap(topic, level));
+  const [wiki, setWiki] = useState<string>('');
+
+  useEffect(() => {
+    setData(generateRoadmap(topic, level));
+  }, [topic, level]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const t = topic.trim();
+    if (!t) { setWiki(''); return; }
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`, { signal: controller.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (json && json.extract) setWiki(json.extract as string); else setWiki('');
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [topic]);
+
+  const onGenerate = () => {
+    setTopic(topicInput.trim());
+    setLevel(levelInput);
+  };
 
   return (
     <div className="space-y-6">
       <header className="flex items-end gap-3 flex-wrap">
         <div className="flex-1 min-w-[240px]">
           <label className="text-sm text-muted-foreground">Topic</label>
-          <Input value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g., Python Programming" />
+          <Input value={topicInput} onChange={e => setTopicInput(e.target.value)} placeholder="e.g., Python Programming" />
         </div>
         <div className="min-w-[200px]">
           <label className="text-sm text-muted-foreground">Level</label>
-          <Select value={level} onValueChange={(v: Level) => setLevel(v)}>
+          <Select value={levelInput} onValueChange={(v: Level) => setLevelInput(v)}>
             <SelectTrigger>
               <SelectValue placeholder="Choose level" />
             </SelectTrigger>
@@ -130,7 +155,7 @@ export const Roadmap = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => { /* generation is instant offline */ }} className="self-end">Generate</Button>
+        <Button onClick={onGenerate} className="self-end">Generate</Button>
       </header>
 
       <Card>
@@ -138,6 +163,11 @@ export const Roadmap = () => {
           <CardTitle>Roadmap Visualization</CardTitle>
         </CardHeader>
         <CardContent>
+          {wiki && (
+            <div className="mb-4 text-sm text-muted-foreground">
+              <span className="font-medium">Overview:</span> {wiki}
+            </div>
+          )}
           <NodeView node={data} />
         </CardContent>
       </Card>

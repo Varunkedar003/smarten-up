@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GameSelection } from '@/lib/progress';
 import { AlgorithmVisualizer } from './AlgorithmVisualizer';
 import { DataStructureBuilder } from './DataStructureBuilder';
@@ -11,6 +11,12 @@ import { PhysicsSimulator } from './PhysicsSimulator';
 import { ChemistryLab } from './ChemistryLab';
 import { BiologyExplorer } from './BiologyExplorer';
 import { GeographyExplorer } from './GeographyExplorer';
+import { ArrayArrangeGame } from './ArrayArrangeGame';
+import { QueueSimulator } from './QueueSimulator';
+import { TreeTraversalGame } from './TreeTraversalGame';
+import { StackSimulatorGame } from './StackSimulatorGame';
+import { GraphPathfinderGame } from './GraphPathfinderGame';
+import { speechService } from '@/services/speechService';
 
 interface GameRouterProps {
   selection: GameSelection;
@@ -18,8 +24,17 @@ interface GameRouterProps {
 }
 
 export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete }) => {
+  const { subject, topic, subtopic, level } = selection;
+
+  useEffect(() => {
+    try {
+      speechService.speakExplanation(subject, subtopic || topic, level);
+    } catch (e) {
+      // ignore speech errors silently
+    }
+  }, [subject, topic, subtopic, level]);
+
   const getGameForSelection = () => {
-    const { subject, topic, subtopic, level } = selection;
 
     // Computer Science games
     if (subject === "Computer Science") {
@@ -29,23 +44,19 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
         case "Data Structures": {
           // Route different subtopics to distinct games
           if (subtopic?.includes('Arrays')) {
-            const { ArrayArrangeGame } = require('./ArrayArrangeGame');
             return <ArrayArrangeGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Stacks')) {
-            return <DataStructureBuilder level={level} onComplete={onComplete} />;
+            return <StackSimulatorGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Queues')) {
-            const { QueueSimulator } = require('./QueueSimulator');
             return <QueueSimulator level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Trees')) {
-            const { TreeTraversalGame } = require('./TreeTraversalGame');
             return <TreeTraversalGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Graphs')) {
-            const { TreeTraversalGame } = require('./TreeTraversalGame');
-            return <TreeTraversalGame level={level} subtopic={'Graph Traversal'} onComplete={onComplete} />;
+            return <GraphPathfinderGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           return <DataStructureBuilder level={level} onComplete={onComplete} />;
         }
