@@ -26,8 +26,29 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
       switch (topic) {
         case "Algorithms":
           return <AlgorithmVisualizer level={level} onComplete={onComplete} />;
-        case "Data Structures":
+        case "Data Structures": {
+          // Route different subtopics to distinct games
+          if (subtopic?.includes('Arrays')) {
+            const { ArrayArrangeGame } = require('./ArrayArrangeGame');
+            return <ArrayArrangeGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Stacks')) {
+            return <DataStructureBuilder level={level} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Queues')) {
+            const { QueueSimulator } = require('./QueueSimulator');
+            return <QueueSimulator level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Trees')) {
+            const { TreeTraversalGame } = require('./TreeTraversalGame');
+            return <TreeTraversalGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Graphs')) {
+            const { TreeTraversalGame } = require('./TreeTraversalGame');
+            return <TreeTraversalGame level={level} subtopic={'Graph Traversal'} onComplete={onComplete} />;
+          }
           return <DataStructureBuilder level={level} onComplete={onComplete} />;
+        }
         case "Programming":
           return <CodeDebugging level={level} onComplete={onComplete} />;
         case "Database Management":

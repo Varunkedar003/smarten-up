@@ -51,6 +51,12 @@ const navigationItems = [
     icon: Trophy,
     description: "Badges & Rewards"
   },
+  {
+    title: "Roadmap / Mind Map",
+    url: "/roadmap",
+    icon: Brain,
+    description: "Generate learning paths"
+  },
 ];
 
 export function AppSidebar() {

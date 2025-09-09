@@ -11,6 +11,7 @@ import { AIAssistant } from "@/pages/AIAssistant";
 import { Progress } from "@/pages/Progress";
 import { Achievements } from "@/pages/Achievements";
 import { GamePlayer } from "@/pages/GamePlayer";
+import { Roadmap } from "@/pages/Roadmap";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/assistant" element={<DashboardLayout><AIAssistant /></DashboardLayout>} />
           <Route path="/progress" element={<DashboardLayout><Progress /></DashboardLayout>} />
           <Route path="/achievements" element={<DashboardLayout><Achievements /></DashboardLayout>} />
+          <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

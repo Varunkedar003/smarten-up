@@ -55,87 +55,244 @@ export class SpeechService {
   }
 
   speakExplanation(topic: string, subtopic: string, level: string): void {
-    const explanations = this.getExplanationText(topic, subtopic, level);
-    if (explanations.length > 0) {
-      // Speak the main explanation
-      this.speak(explanations[0], { rate: 0.8, volume: 0.6 });
-      
-      // Queue additional explanations with delays
-      explanations.slice(1).forEach((explanation, index) => {
-        setTimeout(() => {
-          if (this.isEnabled) {
-            this.speak(explanation, { rate: 0.8, volume: 0.6 });
-          }
-        }, (index + 1) * 8000); // 8 second intervals
-      });
-    }
+    if (!this.isEnabled) return;
+
+    // Build level-aware paragraphs: definition, examples, tips
+    const paragraphs = this.getExplanationText(topic, subtopic, level);
+    if (!paragraphs || paragraphs.length === 0) return;
+
+    // Cancel any ongoing narration and queue a seamless batch using onend chaining
+    this.stop();
+
+    const speakOne = (text: string, onEnd?: () => void) => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.7;
+      utterance.lang = 'en-US';
+
+      // Prefer pleasant default voice when available
+      const voices = this.synthesis.getVoices();
+      if (voices && voices.length > 0) {
+        const preferred = voices.find(v => v.lang === 'en-US' && (v.name.includes('Google') || v.name.includes('Microsoft') || v.name.toLowerCase().includes('female')))
+          || voices.find(v => v.lang === 'en-US')
+          || voices[0];
+        utterance.voice = preferred;
+      }
+
+      utterance.onend = () => { onEnd?.(); };
+      this.currentUtterance = utterance;
+      this.synthesis.speak(utterance);
+    };
+
+    let i = 0;
+    const next = () => {
+      if (!this.isEnabled) return;
+      if (i >= paragraphs.length) return;
+      const text = paragraphs[i++];
+      speakOne(text, next);
+    };
+
+    next();
   }
 
   private getExplanationText(topic: string, subtopic: string, level: string): string[] {
+    // Keyed hand-crafted content (kept for specific cases)
     const key = `${topic}-${subtopic}-${level}`.toLowerCase().replace(/\s+/g, '-');
-    
-    const explanations: Record<string, string[]> = {
-      // Computer Science - Algorithms
+    const canned: Record<string, string[]> = {
       'algorithms-sorting-easy': [
-        'Sorting algorithms help us arrange data in order. Think of it like organizing books on a shelf by height.',
-        'Bubble sort compares neighboring items and swaps them if they are in wrong order. It repeats this process until everything is sorted.',
-        'Selection sort finds the smallest item and puts it first, then finds the next smallest and so on.'
+        'Definition: Sorting means arranging items in order (like smallest to largest).',
+        'Example: Bubble sort compares neighbors and swaps them until everything is in order.',
+        'Tip: Imagine bubbles rising to the top — the largest elements move toward the end each pass.'
       ],
       'algorithms-sorting-intermediate': [
-        'Merge sort uses divide and conquer strategy. It splits the array into halves, sorts each half, then merges them back.',
-        'Quick sort picks a pivot element and partitions the array around it. Elements smaller than pivot go left, larger go right.',
-        'These algorithms are more efficient than basic sorting with better time complexity.'
+        'Definition: Efficient sorts use "divide and conquer" to reduce work.',
+        'Example: Merge sort splits the list, sorts parts, then merges them in order.',
+        'Trade-off: Better time complexity (O(n log n)) but uses extra memory for merging.'
       ],
       'algorithms-sorting-hard': [
-        'Advanced sorting algorithms like heap sort and radix sort use specialized data structures.',
-        'Heap sort builds a max heap and repeatedly extracts the maximum element.',
-        'Understanding time and space complexity helps choose the right algorithm for different scenarios.'
+        'Definition: Advanced sorts use specialized structures (heaps, buckets, digits).',
+        'Example: Heap sort builds a max-heap and repeatedly extracts the max.',
+        'Insight: Choose based on constraints — data range, memory, and stability requirements.'
       ],
-
-      // Computer Science - Data Structures
       'data-structures-arrays-&-lists-easy': [
-        'Arrays store elements in continuous memory locations. Each element has an index starting from zero.',
-        'You can access any element directly using its index. This makes arrays very fast for reading data.',
-        'Lists are similar but can grow or shrink in size dynamically as you add or remove elements.'
+        'Definition: Arrays store items in order, each with an index starting at 0.',
+        'Example: Accessing arr[3] is instant (O(1)).',
+        'Tip: Use arrays when you read a lot but don’t insert in the middle often.'
       ],
       'data-structures-stacks-&-queues-easy': [
-        'Stacks follow Last In First Out principle, like a stack of plates. You can only add or remove from the top.',
-        'Queues follow First In First Out principle, like a line at a store. First person in line is first to be served.',
-        'These data structures are fundamental for many algorithms and system designs.'
+        'Definition: Stacks are LIFO; Queues are FIFO.',
+        'Example: Stack = undo history; Queue = line at a store.',
+        'Tip: Push/Pop for stacks; Enqueue/Dequeue for queues.'
       ],
-
-      // Mathematics 
       'algebra-linear-equations-easy': [
-        'Linear equations represent straight lines on a graph. They have the form y equals mx plus b.',
-        'The variable m is the slope, which tells us how steep the line is.',
-        'The variable b is the y-intercept, where the line crosses the y-axis.'
+        'Definition: A linear equation has the form y = m x + b — a straight line.',
+        'Example: y = 2x + 1 passes through (0,1) and (1,3).',
+        'Tip: m is slope (rise/run); b is where the line crosses the y‑axis.'
       ],
       'geometry-triangles-easy': [
-        'Triangles have three sides and three angles. The sum of all angles in a triangle is always 180 degrees.',
-        'Different types include equilateral with all sides equal, isosceles with two equal sides, and scalene with all different sides.',
-        'The Pythagorean theorem relates the sides of right triangles: a squared plus b squared equals c squared.'
+        'Definition: Triangles have 3 sides/angles; angles sum to 180°.',
+        'Example: Right triangle with legs 3 and 4 has hypotenuse 5 (3-4-5).',
+        'Tip: Equilateral = all equal; Isosceles = two equal; Scalene = all different.'
       ],
-
-      // Physics
       'mechanics-forces-easy': [
-        'Forces are pushes or pulls that can change how objects move. Force equals mass times acceleration.',
-        'Newtons first law states that objects at rest stay at rest, and objects in motion stay in motion, unless acted upon by a force.',
-        'Friction is a force that opposes motion between surfaces in contact.'
+        'Definition: Force makes objects speed up, slow down, or change direction.',
+        'Example: F = m × a; doubling mass doubles needed force for same acceleration.',
+        'Tip: Inertia keeps motion unchanged unless an external force acts.'
       ],
       'electricity-circuits-easy': [
-        'Electric current is the flow of electric charge through a conductor like a wire.',
-        'Voltage is the force that pushes the current through the circuit. Current flows from high voltage to low voltage.',
-        'Resistance opposes the flow of current. Ohms law states voltage equals current times resistance.'
+        'Definition: Current is charge flow; Voltage pushes current; Resistance opposes it.',
+        'Example: Ohm’s Law: V = I × R — 9V across 3Ω gives 3A.',
+        'Tip: Series adds resistances; parallel reduces equivalent resistance.'
       ],
-
-      // Add more explanations for other subjects...
     };
+    if (canned[key]) return canned[key];
 
-    return explanations[key] || [
-      `Let's learn about ${subtopic} in ${topic}. This ${level} level content will help you understand the fundamentals.`,
-      `Pay attention to the interactive elements as they demonstrate key concepts in ${subtopic}.`,
-      `Practice makes perfect! Try different approaches to master ${subtopic}.`
-    ];
+    // Dynamic level-aware generator (definition → example → tip)
+    const lvl = level.toLowerCase();
+    const friendlyLevel = lvl === 'easy' ? 'beginner' : lvl === 'intermediate' ? 'intermediate' : 'advanced';
+    const simple = (s: string) => s
+      .replace(/\s+/g, ' ')
+      .replace(/\s([.,!?:;])/g, '$1');
+
+    const make = (def: string, ex: string, tip: string) => [
+      `Definition: ${def}`,
+      `Example: ${ex}`,
+      `Tip: ${tip}`,
+    ].map(simple);
+
+    const t = topic.toLowerCase();
+    const st = (subtopic || '').toLowerCase();
+
+    // Computer Science defaults
+    if (t.includes('data') && st.includes('array')) {
+      if (lvl === 'easy') return make(
+        'An array stores items in order with positions called indexes (0, 1, 2, …).',
+        'If arr = [5, 2, 9], arr[1] is 2 because indexing starts at 0.',
+        'When you mostly read values, arrays are great because access is instant (O(1)).'
+      );
+      if (lvl === 'intermediate') return make(
+        'Arrays have fixed size; inserting in the middle shifts elements (O(n)).',
+        'Inserting at index 2 of [1,3,4,5] to add 2 gives [1,3,2,4,5].',
+        'Use dynamic arrays (like vectors) to handle growth efficiently.'
+      );
+      return make(
+        'Know cache locality, slicing, and in‑place algorithms for performance.',
+        'Quicksort partitions in place; mergesort uses extra memory but is stable.',
+        'Choose structure by workload: reads vs inserts vs memory constraints.'
+      );
+    }
+    if (t.includes('data') && (st.includes('stack') || st.includes('queue'))) {
+      if (lvl === 'easy') return make(
+        'Stacks are last‑in first‑out; queues are first‑in first‑out.',
+        'Browser back button = stack; print jobs = queue.',
+        'Pick stack for undo; queue for tasks in arrival order.'
+      );
+      if (lvl === 'intermediate') return make(
+        'Stacks use push/pop; queues use enqueue/dequeue; both are O(1).',
+        'Queue with two stacks: push to in‑stack; pop from out‑stack, refill when empty.',
+        'Bounded queues prevent overflow in producer‑consumer systems.'
+      );
+      return make(
+        'Use deque or ring buffer for high‑throughput queues.',
+        'Monotonic stacks/queues help solve sliding window and span problems.',
+        'Consider thread‑safe queues in concurrent systems.'
+      );
+    }
+    if (t.includes('data') && st.includes('tree')) {
+      if (lvl === 'easy') return make(
+        'A tree connects nodes without cycles; a binary tree has up to two children.',
+        'In‑order traversal of a BST visits nodes in ascending order.',
+        'Picture a family tree: parent → children relationships.'
+      );
+      if (lvl === 'intermediate') return make(
+        'Balancing (AVL/Red‑Black) keeps operations near O(log n).',
+        'Pre, In, Post order traversals visit different parts at different times.',
+        'Use tries for fast prefix search and autocompletion.'
+      );
+      return make(
+        'Heaps give fast min/max; segment/fenwick trees support range queries.',
+        'Binary indexed tree supports prefix sums in O(log n).',
+        'Choose structure by query type: range sum, k‑th order, or path queries.'
+      );
+    }
+
+    // Physics, Chemistry, Biology, Mathematics fallbacks
+    if (t.includes('physics')) {
+      if (lvl === 'easy') return make(
+        `${subtopic} is a basic idea in physics you can feel in daily life.`,
+        'For instance, pushing a cart harder makes it speed up more.',
+        'Focus on how the formula describes what you experience.'
+      );
+      if (lvl === 'intermediate') return make(
+        `${subtopic} follows specific laws and units; practice with real values.`,
+        'Example problems with step‑by‑step solutions build intuition.',
+        'Draw free‑body diagrams to reason clearly.'
+      );
+      return make(
+        `Analyse ${subtopic} using models, approximations, and limits.`,
+        'Compare theoretical predictions with edge cases.',
+        'Check assumptions: frictionless, point mass, steady state, etc.'
+      );
+    }
+    if (t.includes('chem')) {
+      if (lvl === 'easy') return make(
+        `${subtopic} explains how particles combine or change.`,
+        'Mixing acids and bases can neutralize into salt and water.',
+        'Balance simple equations to conserve atoms.'
+      );
+      if (lvl === 'intermediate') return make(
+        `${subtopic} follows rules about energy, charge, and molecular shape.`,
+        'Rate depends on collisions and activation energy.',
+        'Use Lewis structures to predict bonding.'
+      );
+      return make(
+        `Consider kinetics, thermodynamics, and mechanisms together.`,
+        'Catalysts change pathway but not equilibrium position.',
+        'Spectroscopy helps verify structures and transitions.'
+      );
+    }
+    if (t.includes('bio')) {
+      if (lvl === 'easy') return make(
+        `${subtopic} looks at living things and how their parts work.`,
+        'Mitochondria make cellular energy (ATP).',
+        'Compare to a city: nucleus = city hall; membrane = gate.'
+      );
+      if (lvl === 'intermediate') return make(
+        `Zoom into processes: transcription, translation, transport, and control.`,
+        'Punnett squares predict inheritance patterns.',
+        'Homeostasis keeps internal conditions steady.'
+      );
+      return make(
+        `Study regulation networks, signaling pathways, and evolution.`,
+        'Enzyme kinetics follows Michaelis–Menten relations.',
+        'Systems biology models interactions at scale.'
+      );
+    }
+    if (t.includes('math')) {
+      if (lvl === 'easy') return make(
+        `${subtopic} builds on numbers and patterns you already know.`,
+        'Solve a simple example step by step to see the rule.',
+        'Check your answer by plugging it back in.'
+      );
+      if (lvl === 'intermediate') return make(
+        `Generalize rules and connect them across topics.`,
+        'Draw graphs to visualize relationships.',
+        'Practice with varied problems to strengthen transfer.'
+      );
+      return make(
+        `Prove properties and analyse limits, growth, or convergence.`,
+        'Compare multiple strategies and their complexity.',
+        'Abstract the pattern to apply it widely.'
+      );
+    }
+
+    // Generic fallback
+    return make(
+      `Let’s explore ${subtopic} in ${topic} at a ${friendlyLevel} level.`,
+      `Here is a simple example to ground the idea in practice.`,
+      `Listen for tips while you play — repetition builds mastery.`
+    );
   }
 
   stop(): void {
