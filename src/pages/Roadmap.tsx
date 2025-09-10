@@ -20,65 +20,148 @@ function generateRoadmap(topic: string, level: Level): RoadNode {
   const lvl = level;
   const ladder = (arr: string[]): RoadNode[] => arr.map(t => ({ title: t }));
 
-  const core: RoadNode = {
-    title: `${base} • ${lvl.charAt(0).toUpperCase() + lvl.slice(1)} roadmap`,
-    description: `A structured path to learn ${base} from ${lvl} level with theory → practice → projects.`,
+  const title = `${base} • ${lvl.charAt(0).toUpperCase() + lvl.slice(1)} roadmap`;
+
+  const beginner: RoadNode = {
+    title,
+    description: `A friendly path to learn ${base} from zero — short theory, quick practice, and tiny projects.`,
     children: [
-      { title: 'Foundations', children: ladder([
-        `Core concepts & terminology of ${base}`,
-        `Setup tools & environment for ${base}`,
-        `Hello World and first steps`,
+      { title: 'Getting Started', children: ladder([
+        `What is ${base}? Key terms with simple examples`,
+        `Set up tools for ${base} (install, editor, hello world)`,
+        `First hands‑on: your very first ${base} task`,
       ])},
-      { title: 'Essential Skills', children: ladder([
-        `Key features and common patterns in ${base}`,
-        `Debugging and problem‑solving in ${base}`,
-        `Reading & understanding ${base} examples`,
+      { title: 'Core Concepts', children: ladder([
+        `Understand essential building blocks of ${base}`,
+        `Learn by examples — read, run, tweak`,
+        `Debug basics: find and fix simple issues`,
       ])},
-      { title: 'Practice & Projects', children: ladder([
-        `Daily practice plan (30–60 minutes)`,
-        `Mini‑projects to apply concepts`,
-        `Peer review or self‑review checklist`,
+      { title: 'Practice Routine', children: ladder([
+        `Daily plan (20–30 min): 1 concept → 2 examples → 1 mini task`,
+        `Flashcards / notes: your personal cheat sheet`,
+        `Weekly quiz: check understanding`,
+      ])},
+      { title: 'Mini Projects', children: ladder([
+        `Project 1: a tiny ${base} demo you can finish in 1–2 hours`,
+        `Project 2: extend the demo with one new feature`,
+        `Share or present what you built`,
       ])},
       { title: 'Resources', children: ladder([
-        `Official docs / tutorials for ${base}`,
-        `Free courses, playlists, and articles`,
-        `Reference cheatsheets`,
+        `Official docs (beginner sections)`,
+        `Free playlists and beginner tutorials for ${base}`,
+        `Cheatsheets & quick‑reference`,
       ])},
     ]
   };
 
-  if (lvl !== 'beginner') {
-    core.children!.splice(1, 0, {
-      title: 'Deeper Concepts',
-      children: ladder([
-        `Intermediate patterns and idioms in ${base}`,
-        `Performance and optimization basics`,
-        `Testing strategies and tooling`,
-      ])
-    });
-  }
-  if (lvl === 'advanced' || lvl === 'pro') {
-    core.children!.push({
-      title: 'Capstone',
-      children: ladder([
-        `Build a full project in ${base}`,
-        `Document & share your work (portfolio)`,
-        `Interview‑style challenges for ${base}`,
-      ])
-    });
-  }
-  if (lvl === 'pro') {
-    core.children!.push({
-      title: 'Expertise',
-      children: ladder([
-        `Teach ${base} (talks, posts, mentoring)`,
-        `Contribute to open source in ${base}`,
-        `Benchmarking and advanced profiling`,
-      ])
-    });
-  }
+  const intermediate: RoadNode = {
+    title,
+    description: `Upgrade your ${base} skills — patterns, tooling, testing, and a guided project sprint.`,
+    children: [
+      { title: 'Review & Fill Gaps', children: ladder([
+        `Revisit core ideas of ${base} with quick challenges`,
+        `Common mistakes and how to avoid them`,
+        `Refactor beginner projects`,
+      ])},
+      { title: 'Deeper Concepts', children: ladder([
+        `Intermediate patterns & idioms in ${base}`,
+        `Performance basics (do less, reuse more)`,
+        `Data handling, I/O, and error control`,
+      ])},
+      { title: 'Tooling & Debugging', children: ladder([
+        `Linters/formatters and productive editor setup`,
+        `Debug workflows and logs`,
+        `CLI tools and scripts for ${base}`,
+      ])},
+      { title: 'Project Sprint', children: ladder([
+        `Build 2–3 small projects (2–4 hours each)` ,
+        `Document decisions and trade‑offs`,
+        `Peer/self review checklist`,
+      ])},
+      { title: 'Testing & Quality', children: ladder([
+        `Write tests for main flows`,
+        `Automate checks (where possible)`,
+        `Measure and tune performance`,
+      ])},
+      { title: 'Resources', children: ladder([
+        `Curated articles & intermediate courses for ${base}`,
+        `Recommended repos/examples to study`,
+        `Interview‑style practice (optional)`,
+      ])},
+    ]
+  };
 
-  return core;
+  const advanced: RoadNode = {
+    title,
+    description: `Think like a builder — architecture, performance, scaling, and a capstone in ${base}.`,
+    children: [
+      { title: 'Architecture & Patterns', children: ladder([
+        `Design choices & trade‑offs in ${base}`,
+        `Advanced patterns and composition`,
+        `Error boundaries, resilience, reliability`,
+      ])},
+      { title: 'Performance & Optimization', children: ladder([
+        `Measure first: profiling & tracing`,
+        `Optimize hotspots & memory`,
+        `Benchmarking and baselines`,
+      ])},
+      { title: 'Scaling & Reliability', children: ladder([
+        `Modularity and boundaries`,
+        `Caching, batching, and backpressure (if relevant)`,
+        `Security & robustness basics`,
+      ])},
+      { title: 'Capstone Project', children: ladder([
+        `Plan an end‑to‑end build in ${base}`,
+        `Implement with documentation and tests`,
+        `Publish and collect feedback`,
+      ])},
+      { title: 'Prep & Portfolio', children: ladder([
+        `Challenge problems relevant to ${base}`,
+        `Polish resume/portfolio with your capstone`,
+        `Share learnings (post or talk)`,
+      ])},
+    ]
+  };
+
+  const pro: RoadNode = {
+    title,
+    description: `Go beyond — specialize, contribute, teach, and lead in ${base}.`,
+    children: [
+      { title: 'Specialization Tracks', children: ladder([
+        `Pick a niche within ${base} and study top resources`,
+        `Create a deep‑dive project or library`,
+        `Compare approaches across ecosystems`,
+      ])},
+      { title: 'Open Source & Community', children: ladder([
+        `Contribute issues/PRs to notable ${base} projects`,
+        `Maintain a small OSS repo`,
+        `Engage in community Q&A`,
+      ])},
+      { title: 'Teaching & Mentoring', children: ladder([
+        `Write posts or record short lessons`,
+        `Mentor beginners and run code reviews`,
+        `Design exercises and rubrics`,
+      ])},
+      { title: 'Advanced Profiling', children: ladder([
+        `Benchmark across versions/environments`,
+        `Track regressions & automate checks`,
+        `Share methodology and results`,
+      ])},
+    ]
+  };
+
+  switch (lvl) {
+    case 'beginner':
+      return beginner;
+    case 'intermediate':
+      return intermediate;
+    case 'advanced':
+      return advanced;
+    case 'pro':
+      return pro;
+    default:
+      return beginner;
+  }
 }
 
 function NodeView({ node, depth = 0 }: { node: RoadNode; depth?: number }) {

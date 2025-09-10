@@ -45,7 +45,7 @@ export const StackSimulatorGame: React.FC<StackSimulatorGameProps> = ({ level, s
   const [ops, setOps] = useState<Op[]>(() => genOps(level));
 
   useEffect(() => {
-    speechService.speakExplanation('Computer Science', subtopic || 'Stacks', level);
+    speechService.speakExplanation('Data Structures', subtopic || 'Stacks', level);
     setOps(genOps(level));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level, subtopic]);

@@ -28,7 +28,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
 
   useEffect(() => {
     try {
-      speechService.speakExplanation(subject, subtopic || topic, level);
+      speechService.speakExplanation(topic, subtopic || topic, level);
     } catch (e) {
       // ignore speech errors silently
     }
