@@ -54,7 +54,7 @@ export class SpeechService {
     this.synthesis.speak(utterance);
   }
 
-  speakExplanation(topic: string, subtopic: string, level: string): void {
+  async speakExplanation(topic: string, subtopic: string, level: string): Promise<void> {
     if (!this.isEnabled) return;
 
     const term = (subtopic && subtopic.trim().length > 1 ? subtopic : topic).trim();
@@ -93,40 +93,162 @@ export class SpeechService {
       next();
     };
 
-    // Try to fetch a short, level-aware definition from Wikipedia (free, no key)
-    (async () => {
+    // Enhanced multi-source explanation fetcher
+    try {
+      let explanation = await this.fetchComprehensiveExplanation(term, topic, subtopic, level);
+      if (explanation && explanation.length > 0) {
+        speakBatch(explanation);
+        return;
+      }
+    } catch (error) {
+      console.log('Explanation fetch failed, using fallback');
+    }
+
+    // Fallback to local generator
+    const paragraphs = this.getExplanationText(topic, subtopic, level);
+    speakBatch(paragraphs);
+  }
+
+  private async fetchComprehensiveExplanation(term: string, topic: string, subtopic: string, level: string): Promise<string[]> {
+    const lvl = level.toLowerCase();
+    
+    // Try multiple sources for better coverage
+    const sources = [
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`,
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`,
+    ];
+
+    if (subtopic && subtopic !== topic) {
+      sources.push(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(subtopic)}`);
+    }
+
+    // Try each source
+    for (const url of sources) {
       try {
-        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term)}`;
         const res = await fetch(url);
         if (res.ok) {
           const json: any = await res.json();
           const extract: string = (json?.extract || '').trim();
-          if (extract) {
-            // Build level-aware paragraphs using web definition + local examples/tips
-            const defSentences = extract.split(/(?<=[.!?])\s+/).slice(0, lvl === 'easy' ? 2 : 3).join(' ');
-            const fallback = this.getExplanationText(topic, subtopic, level);
-
-            // Ensure first line is a definition based on the web summary
-            const webDef = `Definition: ${defSentences}`;
-
-            // Prefer example/tip from our level-aware fallback when available
-            const example = fallback.find(p => p.toLowerCase().startsWith('example:'))
-              || (lvl === 'easy' ? `Example: Think about ${term} in daily life — keep it concrete.` : `Example: A practical scenario showing how ${term} is applied.`);
-            const tip = fallback.find(p => p.toLowerCase().startsWith('tip:'))
-              || (lvl === 'easy' ? `Tip: Learn by doing — try a tiny hands-on task with ${term}.` : `Tip: Compare multiple approaches and note trade-offs for ${term}.`);
-
-            speakBatch([webDef, example, tip]);
-            return;
+          if (extract && extract.length > 50) {
+            // Build comprehensive level-aware explanation
+            const sentences = extract.split(/(?<=[.!?])\s+/);
+            const defSentences = sentences.slice(0, lvl === 'easy' ? 2 : 3).join(' ');
+            
+            const definition = `Definition: ${defSentences}`;
+            const example = this.generateLevelAwareExample(term, topic, subtopic, level, extract);
+            const tip = this.generateLevelAwareTip(term, topic, subtopic, level);
+            
+            return [definition, example, tip];
           }
         }
       } catch (e) {
-        // ignore network errors and fall back
+        continue; // Try next source
       }
+    }
 
-      // Fallback to local generator
-      const paragraphs = this.getExplanationText(topic, subtopic, level);
-      speakBatch(paragraphs);
-    })();
+    throw new Error('No sources available');
+  }
+
+  private generateLevelAwareExample(term: string, topic: string, subtopic: string, level: string, context: string): string {
+    const lvl = level.toLowerCase();
+    const t = topic.toLowerCase();
+    const st = (subtopic || '').toLowerCase();
+
+    // Generate contextual examples based on topic and level
+    if (t.includes('computer') || t.includes('programming')) {
+      if (st.includes('array')) {
+        if (lvl === 'easy') return `Example: Arrays are like lockers numbered 0, 1, 2... If you store [5, 2, 9] in an array, position 1 contains the number 2.`;
+        if (lvl === 'intermediate') return `Example: Arrays allow O(1) access but O(n) insertion in middle. ArrayList in Java grows automatically when capacity is exceeded.`;
+        return `Example: Cache-friendly arrays outperform linked lists for sequential access due to spatial locality and prefetching.`;
+      }
+      if (st.includes('stack')) {
+        if (lvl === 'easy') return `Example: A stack is like a pile of plates - you can only add or remove from the top. Perfect for "undo" functionality.`;
+        if (lvl === 'intermediate') return `Example: Function calls use a call stack. Each function call pushes a frame, and returning pops it off.`;
+        return `Example: Stack-based VMs use operand stacks for expression evaluation. JVM uses this for bytecode execution.`;
+      }
+      if (st.includes('algorithm')) {
+        if (lvl === 'easy') return `Example: Sorting algorithms arrange items in order, like organizing books alphabetically on a shelf.`;
+        if (lvl === 'intermediate') return `Example: Binary search halves the search space each step, finding items in log(n) time instead of linear scanning.`;
+        return `Example: Dynamic programming optimizes overlapping subproblems by memoization, reducing exponential to polynomial complexity.`;
+      }
+    }
+
+    if (t.includes('math')) {
+      if (st.includes('algebra') || st.includes('equation')) {
+        if (lvl === 'easy') return `Example: If x + 3 = 8, then x = 5. You subtract 3 from both sides to isolate x.`;
+        if (lvl === 'intermediate') return `Example: Quadratic equations like x² - 5x + 6 = 0 can be solved by factoring: (x-2)(x-3) = 0, so x = 2 or x = 3.`;
+        return `Example: Systems of linear equations can be solved using matrix methods like Gaussian elimination or Cramer's rule.`;
+      }
+      if (st.includes('geometry')) {
+        if (lvl === 'easy') return `Example: A triangle with sides 3, 4, 5 is a right triangle because 3² + 4² = 5².`;
+        if (lvl === 'intermediate') return `Example: Similar triangles have proportional sides. If triangles are similar with ratio 2:3, areas have ratio 4:9.`;
+        return `Example: Non-Euclidean geometries like spherical geometry have different rules - parallel lines can intersect.`;
+      }
+    }
+
+    if (t.includes('physics')) {
+      if (st.includes('force') || st.includes('motion')) {
+        if (lvl === 'easy') return `Example: Pushing a shopping cart harder makes it accelerate more. Force = mass × acceleration.`;
+        if (lvl === 'intermediate') return `Example: A 2kg object needs 10N force to accelerate at 5 m/s². Newton's second law: F = ma.`;
+        return `Example: In relativistic mechanics, force depends on velocity: F = dp/dt where momentum p = γmv.`;
+      }
+      if (st.includes('electric') || st.includes('circuit')) {
+        if (lvl === 'easy') return `Example: Higher voltage pushes more current through a wire, like higher water pressure pushes more water through a pipe.`;
+        if (lvl === 'intermediate') return `Example: In a series circuit with 12V battery and 4Ω total resistance, current is I = V/R = 3A throughout.`;
+        return `Example: AC circuits involve complex impedance Z = R + jX, where reactance X depends on frequency and component type.`;
+      }
+    }
+
+    if (t.includes('chemistry')) {
+      if (lvl === 'easy') return `Example: When you mix baking soda and vinegar, they react to make bubbles of CO₂ gas.`;
+      if (lvl === 'intermediate') return `Example: In the reaction 2H₂ + O₂ → 2H₂O, hydrogen and oxygen atoms are conserved but rearranged.`;
+      return `Example: Reaction rates follow Arrhenius equation: k = Ae^(-Ea/RT), showing exponential temperature dependence.`;
+    }
+
+    if (t.includes('biology')) {
+      if (lvl === 'easy') return `Example: Plants make their own food through photosynthesis, using sunlight, water, and CO₂ to create sugar.`;
+      if (lvl === 'intermediate') return `Example: DNA replication is semi-conservative - each new strand uses one original strand as template.`;
+      return `Example: Gene expression regulation involves transcription factors binding to promoter sequences, controlling mRNA production rates.`;
+    }
+
+    // Generic contextual example
+    if (lvl === 'easy') return `Example: Think of ${term} like something familiar from daily life to make it concrete and memorable.`;
+    if (lvl === 'intermediate') return `Example: ${term} connects to broader patterns in ${topic} - look for relationships and applications.`;
+    return `Example: Advanced ${term} involves analyzing edge cases, optimizations, and theoretical foundations in ${topic}.`;
+  }
+
+  private generateLevelAwareTip(term: string, topic: string, subtopic: string, level: string): string {
+    const lvl = level.toLowerCase();
+    const t = topic.toLowerCase();
+
+    if (lvl === 'easy') {
+      return `Tip: Start with simple examples of ${term}. Practice one small step at a time, and don't worry about being perfect.`;
+    }
+    
+    if (lvl === 'intermediate') {
+      if (t.includes('computer') || t.includes('programming')) {
+        return `Tip: Code up examples of ${term} yourself. Compare different approaches and understand the trade-offs.`;
+      }
+      if (t.includes('math')) {
+        return `Tip: Work through multiple problems with ${term}. Look for patterns and general strategies that apply broadly.`;
+      }
+      if (t.includes('science')) {
+        return `Tip: Connect ${term} to real-world applications. Understanding the 'why' makes the 'how' much clearer.`;
+      }
+      return `Tip: Practice ${term} with varied examples. Build connections between concepts to deepen understanding.`;
+    }
+
+    // Advanced level
+    if (t.includes('computer') || t.includes('programming')) {
+      return `Tip: Analyze ${term} complexity and edge cases. Consider performance implications and alternative implementations.`;
+    }
+    if (t.includes('math')) {
+      return `Tip: Prove key properties of ${term}. Understanding formal foundations enables creative problem-solving.`;
+    }
+    if (t.includes('science')) {
+      return `Tip: Explore current research on ${term}. Compare theoretical models with experimental data and limitations.`;
+    }
+    return `Tip: Master ${term} by teaching others and tackling challenging problems. Push the boundaries of your understanding.`;
   }
 
   private getExplanationText(topic: string, subtopic: string, level: string): string[] {

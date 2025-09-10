@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Send, 
   Bot, 
@@ -17,7 +18,9 @@ import {
   Atom,
   Globe,
   Mic,
-  MicOff
+  MicOff,
+  Key,
+  Brain
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,7 +74,7 @@ export const AIAssistant = () => {
     {
       id: "1",
       type: "ai",
-      content: "Hi there! I'm your AI learning assistant. I can help you understand any topic, solve problems, or clarify doubts. What would you like to learn about today? 🤖📚",
+      content: "Hi there! I'm your AI learning assistant powered by Gemini AI! I can help you understand any topic, solve problems, or clarify doubts. What would you like to learn about today? 🤖📚",
       timestamp: new Date(),
     }
   ]);
@@ -79,6 +82,8 @@ export const AIAssistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [speechEnabled, setSpeechEnabled] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -88,6 +93,67 @@ export const AIAssistant = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const callGeminiAPI = async (message: string): Promise<string> => {
+    if (!geminiApiKey) {
+      throw new Error('API key required');
+    }
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `You are a helpful educational AI assistant. Provide clear, accurate, and engaging explanations. If it's a learning topic, include examples and break it down step by step. Make your response educational and easy to understand. Question: ${message}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1000,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH", 
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ]
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        return data.candidates[0].content.parts[0].text;
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      throw error;
+    }
+  };
 
   const handleSendMessage = async (content?: string) => {
     const messageContent = content || inputMessage.trim();
@@ -104,45 +170,21 @@ export const AIAssistant = () => {
     setInputMessage("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const lowercaseContent = messageContent.toLowerCase();
-      let aiResponse = "I understand your question about " + messageContent + ". Let me help you with that! ";
+    try {
+      let aiResponse = "";
       
-      // Check for predefined responses
-      for (const [key, response] of Object.entries(aiResponses)) {
-        if (lowercaseContent.includes(key.toLowerCase()) || key.toLowerCase().includes(lowercaseContent)) {
-          aiResponse = response;
-          break;
+      if (geminiApiKey) {
+        // Try Gemini API first
+        try {
+          aiResponse = await callGeminiAPI(messageContent);
+        } catch (error) {
+          console.error('Gemini API failed, using fallback:', error);
+          // Fall back to local responses
+          aiResponse = getFallbackResponse(messageContent);
         }
-      }
-      
-      // If no predefined response, generate a helpful default
-      if (aiResponse.startsWith("I understand your question")) {
-        // data structures common topics
-        if (lowercaseContent.includes("array")) {
-          aiResponse = "Arrays are contiguous collections of items of the same type, accessed by index (0‑based). Key ops: access O(1), update O(1), push/pop end O(1) amortized, insert/delete middle O(n). Pitfalls: fixed size in low‑level langs, out‑of‑bounds, shifting costs. Uses: lookup tables, buffers, dynamic arrays. Want examples in JS or Python?";
-        } else if (lowercaseContent.includes("stack")) {
-          aiResponse = "Stacks are LIFO structures. Ops: push, pop, peek. Uses: undo, recursion, parsing. Implement with arrays or linked lists. Complexity: O(1) for core ops.";
-        } else if (lowercaseContent.includes("queue")) {
-          aiResponse = "Queues are FIFO structures. Ops: enqueue, dequeue, front. Variants: deque, priority queue. Uses: scheduling, BFS. Complexity: O(1) with circular buffer/deque.";
-        } else if (lowercaseContent.includes("linked list")) {
-          aiResponse = "Linked lists are nodes with pointers. Pros: O(1) insertion/deletion given node. Cons: O(n) indexing, extra memory. Variants: singly, doubly, circular.";
-        } else if (lowercaseContent.includes("tree") || lowercaseContent.includes("bst")) {
-          aiResponse = "Trees organize data hierarchically. BST keeps left<node<right; search/insert/delete O(log n) average if balanced. Variants: AVL, Red‑Black, heaps, tries.";
-        } else if (lowercaseContent.includes("graph")) {
-          aiResponse = "Graphs model relationships: vertices + edges. Reps: adjacency list/matrix. Traversals: DFS/BFS. Problems: shortest path, connectivity, cycles.";
-        } else if (lowercaseContent.includes("math") || lowercaseContent.includes("calculate")) {
-          aiResponse = "I'd be happy to help with your math question! Could you provide more specific details about what you're working on? Whether it's algebra, geometry, calculus, or basic arithmetic, I can break it down step by step for you. 📊";
-        } else if (lowercaseContent.includes("science") || lowercaseContent.includes("biology") || lowercaseContent.includes("chemistry") || lowercaseContent.includes("physics")) {
-          aiResponse = "Science is fascinating! I can explain concepts from biology, chemistry, physics, and earth science. What specific topic or concept would you like me to break down for you? I'll make sure to explain it clearly with examples! 🔬";
-        } else if (lowercaseContent.includes("history")) {
-          aiResponse = "History has so many interesting stories and lessons! Whether you're curious about ancient civilizations, world wars, important figures, or historical events, I can provide context and explanations. What period or event interests you? 🏛️";
-        } else if (lowercaseContent.includes("write") || lowercaseContent.includes("essay")) {
-          aiResponse = "Writing is a valuable skill! I can help with essays, creative writing, grammar, structure, and more. What type of writing are you working on, and what specific area would you like help with? 📝";
-        } else {
-          aiResponse = "That's a great question! I'm here to help you learn and understand various topics. Could you provide a bit more context or detail about what you'd like to know? The more specific you are, the better I can assist you! 💡";
-        }
+      } else {
+        // Use fallback responses
+        aiResponse = getFallbackResponse(messageContent);
       }
 
       const aiMessage: Message = {
@@ -153,7 +195,6 @@ export const AIAssistant = () => {
       };
 
       setMessages(prev => [...prev, aiMessage]);
-      setIsLoading(false);
 
       // Text-to-speech if enabled
       if (speechEnabled && 'speechSynthesis' in window) {
@@ -162,7 +203,53 @@ export const AIAssistant = () => {
         utterance.pitch = 1;
         speechSynthesis.speak(utterance);
       }
-    }, 1500);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "ai",
+        content: "I apologize, but I'm having trouble processing your request right now. Please try again or rephrase your question.",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getFallbackResponse = (messageContent: string): string => {
+    const lowercaseContent = messageContent.toLowerCase();
+    
+    // Check for predefined responses
+    for (const [key, response] of Object.entries(aiResponses)) {
+      if (lowercaseContent.includes(key.toLowerCase()) || key.toLowerCase().includes(lowercaseContent)) {
+        return response;
+      }
+    }
+    
+    // Generate contextual fallback responses
+    if (lowercaseContent.includes("array")) {
+      return "Arrays are contiguous collections of items of the same type, accessed by index (0‑based). Key ops: access O(1), update O(1), push/pop end O(1) amortized, insert/delete middle O(n). Pitfalls: fixed size in low‑level langs, out‑of‑bounds, shifting costs. Uses: lookup tables, buffers, dynamic arrays. Want examples in JS or Python?";
+    } else if (lowercaseContent.includes("stack")) {
+      return "Stacks are LIFO structures. Ops: push, pop, peek. Uses: undo, recursion, parsing. Implement with arrays or linked lists. Complexity: O(1) for core ops.";
+    } else if (lowercaseContent.includes("queue")) {
+      return "Queues are FIFO structures. Ops: enqueue, dequeue, front. Variants: deque, priority queue. Uses: scheduling, BFS. Complexity: O(1) with circular buffer/deque.";
+    } else if (lowercaseContent.includes("linked list")) {
+      return "Linked lists are nodes with pointers. Pros: O(1) insertion/deletion given node. Cons: O(n) indexing, extra memory. Variants: singly, doubly, circular.";
+    } else if (lowercaseContent.includes("tree") || lowercaseContent.includes("bst")) {
+      return "Trees organize data hierarchically. BST keeps left<node<right; search/insert/delete O(log n) average if balanced. Variants: AVL, Red‑Black, heaps, tries.";
+    } else if (lowercaseContent.includes("graph")) {
+      return "Graphs model relationships: vertices + edges. Reps: adjacency list/matrix. Traversals: DFS/BFS. Problems: shortest path, connectivity, cycles.";
+    } else if (lowercaseContent.includes("math") || lowercaseContent.includes("calculate")) {
+      return "I'd be happy to help with your math question! Could you provide more specific details about what you're working on? Whether it's algebra, geometry, calculus, or basic arithmetic, I can break it down step by step for you. 📊";
+    } else if (lowercaseContent.includes("science") || lowercaseContent.includes("biology") || lowercaseContent.includes("chemistry") || lowercaseContent.includes("physics")) {
+      return "Science is fascinating! I can explain concepts from biology, chemistry, physics, and earth science. What specific topic or concept would you like me to break down for you? I'll make sure to explain it clearly with examples! 🔬";
+    } else if (lowercaseContent.includes("history")) {
+      return "History has so many interesting stories and lessons! Whether you're curious about ancient civilizations, world wars, important figures, or historical events, I can provide context and explanations. What period or event interests you? 🏛️";
+    } else if (lowercaseContent.includes("write") || lowercaseContent.includes("essay")) {
+      return "Writing is a valuable skill! I can help with essays, creative writing, grammar, structure, and more. What type of writing are you working on, and what specific area would you like help with? 📝";
+    } else {
+      return "That's a great question! I'm here to help you learn and understand various topics. Could you provide a bit more context or detail about what you'd like to know? The more specific you are, the better I can assist you! 💡";
+    }
   };
 
   const toggleSpeech = () => {
@@ -227,6 +314,15 @@ export const AIAssistant = () => {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                className="flex items-center gap-2"
+              >
+                <Brain className="w-4 h-4" />
+                {geminiApiKey ? "Gemini Connected" : "Connect Gemini"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={toggleSpeech}
                 className="flex items-center gap-2"
               >
@@ -237,6 +333,43 @@ export const AIAssistant = () => {
           </div>
         </CardHeader>
       </Card>
+
+      {/* Gemini API Key Input */}
+      {showApiKeyInput && (
+        <Card>
+          <CardContent className="p-4">
+            <Alert>
+              <Key className="h-4 w-4" />
+              <AlertDescription>
+                Enter your Gemini API key to unlock advanced AI capabilities. Get your free API key from{' '}
+                <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                  Google AI Studio
+                </a>
+              </AlertDescription>
+            </Alert>
+            <div className="flex gap-2 mt-3">
+              <Input
+                type="password"
+                value={geminiApiKey}
+                onChange={(e) => setGeminiApiKey(e.target.value)}
+                placeholder="Enter your Gemini API key..."
+                className="flex-1"
+              />
+              <Button 
+                onClick={() => {
+                  if (geminiApiKey) {
+                    toast.success("Gemini API connected successfully!");
+                    setShowApiKeyInput(false);
+                  }
+                }}
+                disabled={!geminiApiKey}
+              >
+                Connect
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Suggested Questions */}
       {messages.length === 1 && (
