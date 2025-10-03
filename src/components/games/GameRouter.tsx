@@ -18,6 +18,10 @@ import { GraphPathfinderGame } from './GraphPathfinderGame';
 import { PacketSimulationGame } from './PacketSimulationGame';
 import { AgileSprintRunner } from './AgileSprintRunner';
 import { CodePuzzle } from './CodePuzzle';
+import { NetworkSimulator3D } from './NetworkSimulator3D';
+import { MoleculeBuilder3D } from './MoleculeBuilder3D';
+import { PhysicsWorld3D } from './PhysicsWorld3D';
+import { DNASequencer3D } from './DNASequencer3D';
 import { speechService } from '@/services/speechService';
 
 interface GameRouterProps {
@@ -80,6 +84,9 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
         case "Digital Logic":
           return <CircuitBuilder level={level} onComplete={onComplete} />;
         case "Computer Networks":
+          if (subtopic?.includes('Routing') || subtopic?.includes('TCP/IP') || subtopic?.includes('OSI')) {
+            return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
           if (subtopic?.includes('Network Security')) {
             return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
@@ -103,16 +110,25 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
 
     // Physics games
     if (subject === "Physics") {
+      if (subtopic?.includes('Kinematics') || subtopic?.includes('Forces') || subtopic?.includes('Momentum')) {
+        return <PhysicsWorld3D level={level} subtopic={subtopic} onComplete={onComplete} />;
+      }
       return <PhysicsSimulator level={level} subtopic={subtopic} onComplete={onComplete} />;
     }
 
     // Chemistry games
     if (subject === "Chemistry") {
+      if (subtopic?.includes('Bonding') || subtopic?.includes('Molecular') || subtopic?.includes('Atomic')) {
+        return <MoleculeBuilder3D level={level} subtopic={subtopic} onComplete={onComplete} />;
+      }
       return <ChemistryLab level={level} subtopic={subtopic} onComplete={onComplete} />;
     }
 
     // Biology games
     if (subject === "Biology") {
+      if (subtopic?.includes('DNA') || subtopic?.includes('Genetics') || subtopic?.includes('Gene')) {
+        return <DNASequencer3D level={level} subtopic={subtopic} onComplete={onComplete} />;
+      }
       return <BiologyExplorer level={level} subtopic={subtopic} onComplete={onComplete} />;
     }
 

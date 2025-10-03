@@ -87,32 +87,47 @@ export const GamePlayer = () => {
             <GameRouter selection={selection} onComplete={onComplete} />
           </div>
           
-          <div className="lg:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader>
+          <div className="lg:col-span-1 space-y-4">
+            <Card className="sticky top-6 border-2 border-primary/20 bg-gradient-to-br from-background to-secondary/20">
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Background Explanation</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <span className="text-2xl">💡</span>
+                    Background Explanation
+                  </CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => speechService.stop()}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 hover:bg-destructive/10"
+                    title="Stop audio"
                   >
                     <VolumeX className="h-4 w-4" />
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Level: <span className="font-semibold capitalize">{selection.level}</span>
+                </p>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
                 {explanationText.length > 0 ? (
                   explanationText.map((text, idx) => (
-                    <p key={idx} className="text-sm text-muted-foreground leading-relaxed">
-                      {text}
-                    </p>
+                    <div 
+                      key={idx} 
+                      className="p-3 rounded-lg bg-secondary/50 border border-border animate-fade-in"
+                      style={{ animationDelay: `${idx * 0.1}s` }}
+                    >
+                      <p className="text-sm leading-relaxed">
+                        {text}
+                      </p>
+                    </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    Explanation will appear here when the game starts...
-                  </p>
+                  <div className="p-4 rounded-lg bg-secondary/30 border border-dashed border-border">
+                    <p className="text-sm text-muted-foreground italic text-center">
+                      Loading explanation...
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>

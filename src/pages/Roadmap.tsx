@@ -442,60 +442,103 @@ function generateRoadmap(topic: string, level: Level): RoadNode {
 function NodeView({ node, depth = 0 }: { node: RoadNode; depth?: number }) {
   const hasChildren = (node.children?.length ?? 0) > 0;
   
+  // Extract emoji from title if present
+  const emojiMatch = node.title.match(/^([^\w\s]+)/);
+  const emoji = emojiMatch ? emojiMatch[1] : '';
+  const titleWithoutEmoji = emoji ? node.title.slice(emoji.length).trim() : node.title;
+  
   // Determine visual styling based on depth and content
   const getNodeStyling = () => {
     if (depth === 0) {
-      return "bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30 shadow-lg";
+      return "bg-gradient-to-br from-primary/20 via-accent/10 to-secondary/20 border-primary/50 shadow-xl";
     }
     if (depth === 1) {
-      return "bg-gradient-to-r from-accent/5 to-success/5 border-accent/40 shadow-md hover:shadow-lg transition-shadow";
+      return "bg-gradient-to-r from-accent/10 via-success/5 to-primary/10 border-accent/60 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all";
     }
-    return "bg-card/80 border-border/60 hover:bg-accent/5 hover:border-accent/50 transition-colors";
+    return "bg-gradient-to-r from-card via-card/90 to-secondary/5 border-border/70 hover:bg-accent/10 hover:border-accent/70 hover:scale-[1.01] transition-all";
   };
 
   const getTextStyling = () => {
-    if (depth === 0) return "text-lg font-bold text-foreground";
-    if (depth === 1) return "text-base font-semibold text-foreground";
-    return "text-sm font-medium text-foreground/90";
+    if (depth === 0) return "text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary";
+    if (depth === 1) return "text-base font-bold text-foreground";
+    return "text-sm font-medium text-foreground/95";
   };
 
   const getConnectorColor = () => {
-    if (depth === 1) return "border-accent/60";
-    return "border-border/40";
+    if (depth === 1) return "border-accent/70";
+    if (depth === 2) return "border-primary/50";
+    return "border-border/50";
+  };
+
+  const getEmojiStyling = () => {
+    if (depth === 0) return "text-4xl";
+    if (depth === 1) return "text-2xl";
+    return "text-lg";
   };
 
   return (
-    <div className="relative pl-4 mb-2">
+    <div className="relative pl-4 mb-3">
       {depth > 0 && (
-        <div className={`absolute left-0 top-2 h-full border-l-2 ${getConnectorColor()}`} />
+        <div className={`absolute left-0 top-3 h-full border-l-2 ${getConnectorColor()}`} />
       )}
       
-      <div className={`rounded-xl border-2 p-4 ${getNodeStyling()} backdrop-blur-sm`}>
-        <div className={getTextStyling()}>{node.title}</div>
-        {node.description && (
-          <div className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            {node.description}
-          </div>
+      <div className={`rounded-2xl border-2 p-5 ${getNodeStyling()} backdrop-blur-sm relative overflow-hidden`}>
+        {/* Decorative background elements */}
+        {depth === 0 && (
+          <>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
+          </>
         )}
         
-        {/* Progress indicator for leaf nodes */}
-        {!hasChildren && depth > 1 && (
-          <div className="mt-3 flex items-center gap-2">
-            <div className="flex-1 h-1 bg-border/30 rounded-full">
-              <div className="h-full w-0 bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500 hover:w-1/3" />
-            </div>
-            <span className="text-xs text-muted-foreground">Ready to start</span>
+        <div className="relative flex items-start gap-3">
+          {emoji && (
+            <span className={`${getEmojiStyling()} flex-shrink-0 animate-scale-in`}>
+              {emoji}
+            </span>
+          )}
+          <div className="flex-1">
+            <div className={getTextStyling()}>{titleWithoutEmoji}</div>
+            {node.description && (
+              <div className="text-sm text-muted-foreground mt-2 leading-relaxed italic">
+                {node.description}
+              </div>
+            )}
+            
+            {/* Progress indicator for leaf nodes */}
+            {!hasChildren && depth > 1 && (
+              <div className="mt-4 flex items-center gap-2">
+                <div className="flex-1 h-2 bg-gradient-to-r from-border/40 to-border/20 rounded-full overflow-hidden">
+                  <div className="h-full w-0 bg-gradient-to-r from-primary via-accent to-secondary rounded-full transition-all duration-700 hover:w-2/3 hover:animate-pulse" />
+                </div>
+                <span className="text-xs font-medium text-muted-foreground bg-secondary/30 px-2 py-1 rounded-full">
+                  Start
+                </span>
+              </div>
+            )}
+            
+            {/* Depth indicators */}
+            {depth === 1 && (
+              <div className="mt-3 flex gap-1">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="w-2 h-2 rounded-full bg-accent/40 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
       
       {hasChildren && (
-        <div className="ml-6 mt-3 space-y-2">
+        <div className="ml-8 mt-4 space-y-3">
           {node.children!.map((c, i) => (
             <div key={i} className="relative">
-              <div className={`absolute left-[-24px] top-4 w-6 border-t-2 ${getConnectorColor()}`} />
+              <div className={`absolute left-[-32px] top-5 w-8 border-t-2 ${getConnectorColor()}`} />
               {depth === 1 && (
-                <div className={`absolute left-[-26px] top-3 w-2 h-2 rounded-full bg-accent/70`} />
+                <div className={`absolute left-[-34px] top-[18px] w-3 h-3 rounded-full bg-gradient-to-r from-accent to-primary shadow-md animate-pulse`} style={{ animationDelay: `${i * 0.15}s` }} />
+              )}
+              {depth === 2 && (
+                <div className={`absolute left-[-34px] top-[18px] w-2 h-2 rounded-full bg-primary/60`} />
               )}
               <NodeView node={c} depth={depth + 1} />
             </div>
@@ -538,44 +581,62 @@ export const Roadmap = () => {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-end gap-3 flex-wrap">
+      <header className="flex items-end gap-3 flex-wrap p-6 rounded-2xl bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border border-border/50">
         <div className="flex-1 min-w-[240px]">
-          <label className="text-sm text-muted-foreground">Topic</label>
-          <Input value={topicInput} onChange={e => setTopicInput(e.target.value)} placeholder="e.g., Python Programming" />
+          <label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+            <span className="text-lg">🎯</span> Topic
+          </label>
+          <Input 
+            value={topicInput} 
+            onChange={e => setTopicInput(e.target.value)} 
+            placeholder="e.g., Python Programming" 
+            className="mt-1 border-2 focus:border-primary transition-colors"
+          />
         </div>
         <div className="min-w-[200px]">
-          <label className="text-sm text-muted-foreground">Level</label>
+          <label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+            <span className="text-lg">📊</span> Level
+          </label>
           <Select value={levelInput} onValueChange={(v: Level) => setLevelInput(v)}>
-            <SelectTrigger>
+            <SelectTrigger className="mt-1 border-2">
               <SelectValue placeholder="Choose level" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-              <SelectItem value="pro">Pro</SelectItem>
+              <SelectItem value="beginner">🌱 Beginner</SelectItem>
+              <SelectItem value="intermediate">🚀 Intermediate</SelectItem>
+              <SelectItem value="advanced">⚡ Advanced</SelectItem>
+              <SelectItem value="pro">🏆 Pro</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={onGenerate} className="self-end">Generate</Button>
+        <Button 
+          onClick={onGenerate} 
+          className="self-end bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-transform shadow-lg"
+        >
+          Generate Roadmap ✨
+        </Button>
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Roadmap Visualization</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="border-2 shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b-2 border-border/50">
+          <CardTitle className="text-2xl flex items-center gap-2">
+            <span className="text-3xl">🗺️</span>
+            Your Learning Roadmap
+          </CardTitle>
           {wiki && (
-            <div className="mb-4 text-sm text-muted-foreground">
-              <span className="font-medium">Overview:</span> {wiki}
+            <div className="mt-3 p-4 rounded-lg bg-secondary/30 border border-border/50 backdrop-blur-sm">
+              <span className="font-semibold text-sm text-foreground">📚 Overview:</span>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{wiki}</p>
             </div>
           )}
+        </CardHeader>
+        <CardContent className="pt-6">
           <NodeView node={data} />
         </CardContent>
       </Card>
 
-      <p className="text-xs text-muted-foreground">
-        Note: This roadmap is generated locally (no API keys needed). We can optionally connect to a provider (Gemini/ChatGPT/Perplexity) later if you add an API key.
+      <p className="text-xs text-center text-muted-foreground p-4 rounded-lg bg-secondary/20 border border-border/30">
+        💡 <span className="font-medium">Pro tip:</span> This roadmap is generated locally with topic-specific content. Each level (Beginner → Intermediate → Advanced → Pro) offers a unique learning path!
       </p>
     </div>
   );

@@ -176,7 +176,7 @@ export class SpeechService {
     const st = (subtopic || '').toLowerCase();
 
     // Generate contextual examples based on topic and level
-    if (t.includes('computer') || t.includes('programming')) {
+    if (t.includes('computer') || t.includes('programming') || t.includes('engineering')) {
       if (st.includes('array')) {
         if (lvl === 'easy') return `Example: Arrays are like lockers numbered 0, 1, 2... If you store [5, 2, 9] in an array, position 1 contains the number 2.`;
         if (lvl === 'intermediate') return `Example: Arrays allow O(1) access but O(n) insertion in middle. ArrayList in Java grows automatically when capacity is exceeded.`;
@@ -191,6 +191,21 @@ export class SpeechService {
         if (lvl === 'easy') return `Example: Sorting algorithms arrange items in order, like organizing books alphabetically on a shelf.`;
         if (lvl === 'intermediate') return `Example: Binary search halves the search space each step, finding items in log(n) time instead of linear scanning.`;
         return `Example: Dynamic programming optimizes overlapping subproblems by memoization, reducing exponential to polynomial complexity.`;
+      }
+      if (st.includes('network') || st.includes('packet') || st.includes('routing')) {
+        if (lvl === 'easy') return `Example: Data packets travel through routers like letters through post offices - each router decides the next stop.`;
+        if (lvl === 'intermediate') return `Example: TCP ensures reliable delivery with acknowledgments and retransmission, while UDP is faster but unreliable.`;
+        return `Example: BGP uses path vector routing with policy-based decisions, allowing autonomous systems to control traffic flow.`;
+      }
+      if (st.includes('agile') || st.includes('software engineering')) {
+        if (lvl === 'easy') return `Example: Agile means working in short sprints, delivering features quickly and getting feedback early.`;
+        if (lvl === 'intermediate') return `Example: Sprint planning, daily standups, and retrospectives help teams adapt and continuously improve.`;
+        return `Example: DevOps practices integrate CI/CD pipelines, enabling automated testing and deployment on every commit.`;
+      }
+      if (st.includes('circuit') || st.includes('logic')) {
+        if (lvl === 'easy') return `Example: An AND gate only outputs 1 when both inputs are 1, like a series switch circuit.`;
+        if (lvl === 'intermediate') return `Example: Flip-flops store one bit of data, forming the basis of memory and sequential logic circuits.`;
+        return `Example: Karnaugh maps minimize boolean expressions algebraically, reducing gate count in combinational circuits.`;
       }
     }
 
@@ -247,20 +262,20 @@ export class SpeechService {
     }
     
     if (lvl === 'intermediate') {
-      if (t.includes('computer') || t.includes('programming')) {
+      if (t.includes('computer') || t.includes('programming') || t.includes('engineering')) {
         return `Tip: Code up examples of ${term} yourself. Compare different approaches and understand the trade-offs.`;
       }
       if (t.includes('math')) {
         return `Tip: Work through multiple problems with ${term}. Look for patterns and general strategies that apply broadly.`;
       }
-      if (t.includes('science')) {
+      if (t.includes('science') || t.includes('physics') || t.includes('chemistry') || t.includes('biology')) {
         return `Tip: Connect ${term} to real-world applications. Understanding the 'why' makes the 'how' much clearer.`;
       }
       return `Tip: Practice ${term} with varied examples. Build connections between concepts to deepen understanding.`;
     }
 
     // Advanced level
-    if (t.includes('computer') || t.includes('programming')) {
+    if (t.includes('computer') || t.includes('programming') || t.includes('engineering')) {
       return `Tip: Analyze ${term} complexity and edge cases. Consider performance implications and alternative implementations.`;
     }
     if (t.includes('math')) {
