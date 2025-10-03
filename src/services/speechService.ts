@@ -3,9 +3,27 @@ export class SpeechService {
   private synthesis: SpeechSynthesis;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   private isEnabled: boolean = true;
+  private currentExplanationText: string[] = [];
+  private explanationListeners: ((text: string[]) => void)[] = [];
 
   constructor() {
     this.synthesis = window.speechSynthesis;
+  }
+
+  getCurrentExplanation(): string[] {
+    return this.currentExplanationText;
+  }
+
+  onExplanationChange(callback: (text: string[]) => void): () => void {
+    this.explanationListeners.push(callback);
+    return () => {
+      this.explanationListeners = this.explanationListeners.filter(cb => cb !== callback);
+    };
+  }
+
+  private notifyExplanationChange(text: string[]): void {
+    this.currentExplanationText = text;
+    this.explanationListeners.forEach(cb => cb(text));
   }
 
   speak(text: string, options: {
@@ -62,6 +80,7 @@ export class SpeechService {
 
     // Cancel any ongoing narration
     this.stop();
+    this.currentExplanationText = [];
 
     const speakBatch = (paragraphs: string[]) => {
       if (!paragraphs || paragraphs.length === 0) return;
@@ -97,6 +116,7 @@ export class SpeechService {
     try {
       let explanation = await this.fetchComprehensiveExplanation(term, topic, subtopic, level);
       if (explanation && explanation.length > 0) {
+        this.notifyExplanationChange(explanation);
         speakBatch(explanation);
         return;
       }
@@ -106,6 +126,7 @@ export class SpeechService {
 
     // Fallback to local generator
     const paragraphs = this.getExplanationText(topic, subtopic, level);
+    this.notifyExplanationChange(paragraphs);
     speakBatch(paragraphs);
   }
 

@@ -10,12 +10,14 @@ import { MathEquationSolver } from './MathEquationSolver';
 import { PhysicsSimulator } from './PhysicsSimulator';
 import { ChemistryLab } from './ChemistryLab';
 import { BiologyExplorer } from './BiologyExplorer';
-import { GeographyExplorer } from './GeographyExplorer';
 import { ArrayArrangeGame } from './ArrayArrangeGame';
 import { QueueSimulator } from './QueueSimulator';
 import { TreeTraversalGame } from './TreeTraversalGame';
 import { StackSimulatorGame } from './StackSimulatorGame';
 import { GraphPathfinderGame } from './GraphPathfinderGame';
+import { PacketSimulationGame } from './PacketSimulationGame';
+import { AgileSprintRunner } from './AgileSprintRunner';
+import { CodePuzzle } from './CodePuzzle';
 import { speechService } from '@/services/speechService';
 
 interface GameRouterProps {
@@ -61,6 +63,9 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           return <DataStructureBuilder level={level} onComplete={onComplete} />;
         }
         case "Programming":
+          if (subtopic?.includes('Syntax') || subtopic?.includes('Debugging')) {
+            return <CodePuzzle level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
           return <CodeDebugging level={level} onComplete={onComplete} />;
         case "Database Management":
           return <DatabaseDesigner level={level} onComplete={onComplete} />;
@@ -75,8 +80,15 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
         case "Digital Logic":
           return <CircuitBuilder level={level} onComplete={onComplete} />;
         case "Computer Networks":
+          if (subtopic?.includes('Network Security')) {
+            return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
           return <NetworkSimulator level={level} onComplete={onComplete} />;
         case "Software Engineering":
+          if (subtopic?.includes('Agile')) {
+            return <AgileSprintRunner level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
+          return <CodeDebugging level={level} onComplete={onComplete} />;
         case "Systems Design":
           return <CodeDebugging level={level} onComplete={onComplete} />;
         default:
@@ -102,11 +114,6 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
     // Biology games
     if (subject === "Biology") {
       return <BiologyExplorer level={level} subtopic={subtopic} onComplete={onComplete} />;
-    }
-
-    // Geography games
-    if (subject === "Geography") {
-      return <GeographyExplorer level={level} subtopic={subtopic} onComplete={onComplete} />;
     }
 
     // Other subjects - use appropriate fallbacks
