@@ -18,6 +18,19 @@ export type ProgressData = {
 
 const KEY = "lr_progress";
 
+const BADGES = {
+  "Getting Started": { threshold: 1, type: "games" },
+  "Game Explorer": { threshold: 5, type: "games" },
+  "Gaming Enthusiast": { threshold: 15, type: "games" },
+  "Topic Tamer": { threshold: 3, type: "topics" },
+  "Subject Master": { threshold: 10, type: "topics" },
+  "Quick Learner": { threshold: 1, type: "highscore" },
+  "Perfect Score": { threshold: 1, type: "perfect" },
+  "XP Hunter": { threshold: 100, type: "xp" },
+  "XP Legend": { threshold: 500, type: "xp" },
+  "Comeback King": { threshold: 3, type: "recovery" }
+};
+
 const defaultProgress: ProgressData = {
   topicsCompleted: 0,
   gamesPlayed: 0,
@@ -68,13 +81,25 @@ export function recordGameComplete(sel: GameSelection, correct: number, total: n
   if (correct / total >= 0.8) {
     p.rewards += 1;
     if (!p.badges.includes("Quick Learner")) p.badges.push("Quick Learner");
-  } else if (correct / total < 0.4) {
-    p.punishments += 1; // playful nudge
+  }
+  
+  if (correct === total) {
+    if (!p.badges.includes("Perfect Score")) p.badges.push("Perfect Score");
+  }
+  
+  if (correct / total < 0.4) {
+    p.punishments += 1;
+  } else if (p.punishments >= 3 && correct / total >= 0.7) {
+    if (!p.badges.includes("Comeback King")) p.badges.push("Comeback King");
   }
 
   // Milestone badges
   if (p.gamesPlayed >= 5 && !p.badges.includes("Game Explorer")) p.badges.push("Game Explorer");
+  if (p.gamesPlayed >= 15 && !p.badges.includes("Gaming Enthusiast")) p.badges.push("Gaming Enthusiast");
   if (p.topicsCompleted >= 3 && !p.badges.includes("Topic Tamer")) p.badges.push("Topic Tamer");
+  if (p.topicsCompleted >= 10 && !p.badges.includes("Subject Master")) p.badges.push("Subject Master");
+  if (p.xp >= 100 && !p.badges.includes("XP Hunter")) p.badges.push("XP Hunter");
+  if (p.xp >= 500 && !p.badges.includes("XP Legend")) p.badges.push("XP Legend");
 
   setProgress(p);
 }

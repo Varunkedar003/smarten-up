@@ -59,14 +59,14 @@ const subjectsData: Record<Subject, SubjectData> = {
         name: "Algorithms",
         description: "Sorting, searching, graph algorithms, and optimization",
         progress: 35,
-        subtopics: ["Sorting", "Searching", "Graph Traversal", "Dynamic Programming", "Greedy Algorithms", "Divide & Conquer"]
+        subtopics: ["Bubble Sort", "Quick Sort", "Merge Sort", "Binary Search", "DFS", "BFS", "Dijkstra's Algorithm", "Dynamic Programming", "Greedy Algorithms", "Backtracking"]
       },
       {
         id: "data-structures",
         name: "Data Structures",
         description: "Arrays, trees, graphs, hash tables, and advanced structures",
         progress: 50,
-        subtopics: ["Arrays & Lists", "Stacks & Queues", "Trees", "Hash Tables", "Graphs", "Heaps"]
+        subtopics: ["Arrays", "Linked Lists", "Stacks", "Queues", "Binary Trees", "AVL Trees", "Hash Tables", "Graphs", "Heaps", "Tries"]
       },
       {
         id: "programming",
@@ -80,7 +80,14 @@ const subjectsData: Record<Subject, SubjectData> = {
         name: "Database Management",
         description: "SQL, NoSQL, database design, and optimization",
         progress: 15,
-        subtopics: ["SQL Fundamentals", "Database Design", "Normalization", "Indexing", "NoSQL", "Query Optimization"]
+        subtopics: ["SQL Basics", "Joins", "Database Design", "Normalization", "Indexing", "Transactions", "NoSQL Databases", "Query Optimization", "Database Security"]
+      },
+      {
+        id: "machine-learning",
+        name: "Machine Learning",
+        description: "AI algorithms, neural networks, and data science",
+        progress: 10,
+        subtopics: ["Supervised Learning", "Unsupervised Learning", "Neural Networks", "Deep Learning", "NLP", "Computer Vision", "Model Training", "Feature Engineering"]
       }
     ]
   },
@@ -101,7 +108,7 @@ const subjectsData: Record<Subject, SubjectData> = {
         name: "Computer Networks",
         description: "Protocols, routing, network security, and architecture",
         progress: 30,
-        subtopics: ["OSI Model", "TCP/IP", "Routing Protocols", "Network Security", "Wireless Networks", "Network Troubleshooting"]
+        subtopics: ["OSI Model", "TCP/IP", "HTTP/HTTPS", "DNS", "Routing Protocols", "Network Security", "Firewalls", "VPN", "Wireless Networks", "Network Troubleshooting"]
       },
       {
         id: "software-engineering",
@@ -143,7 +150,7 @@ const subjectsData: Record<Subject, SubjectData> = {
         name: "Calculus",
         description: "Limits, derivatives, integrals, and applications",
         progress: 25,
-        subtopics: ["Limits", "Derivatives", "Integration", "Applications", "Series", "Differential Equations"]
+        subtopics: ["Limits", "Continuity", "Derivatives", "Chain Rule", "Integration", "Definite Integrals", "Applications", "Series", "Taylor Series", "Differential Equations"]
       },
       {
         id: "statistics",
@@ -185,7 +192,14 @@ const subjectsData: Record<Subject, SubjectData> = {
         name: "Modern Physics",
         description: "Quantum mechanics, relativity, and atomic structure",
         progress: 15,
-        subtopics: ["Quantum Theory", "Atomic Structure", "Special Relativity", "Nuclear Physics", "Particle Physics", "Wave-Particle Duality"]
+        subtopics: ["Photoelectric Effect", "Quantum Theory", "Atomic Structure", "Bohr Model", "Special Relativity", "Nuclear Physics", "Particle Physics", "Wave-Particle Duality", "Uncertainty Principle"]
+      },
+      {
+        id: "optics",
+        name: "Optics & Waves",
+        description: "Light, reflection, refraction, and wave phenomena",
+        progress: 30,
+        subtopics: ["Reflection", "Refraction", "Lenses", "Mirrors", "Interference", "Diffraction", "Polarization", "Wave Optics"]
       }
     ]
   },
@@ -255,7 +269,14 @@ const subjectsData: Record<Subject, SubjectData> = {
         name: "Human Biology",
         description: "Anatomy, physiology, and human body systems",
         progress: 45,
-        subtopics: ["Circulatory System", "Nervous System", "Digestive System", "Respiratory System", "Immune System", "Reproduction"]
+        subtopics: ["Circulatory System", "Heart Structure", "Nervous System", "Brain Function", "Digestive System", "Respiratory System", "Immune System", "Endocrine System", "Reproduction"]
+      },
+      {
+        id: "microbiology",
+        name: "Microbiology",
+        description: "Bacteria, viruses, and microscopic organisms",
+        progress: 20,
+        subtopics: ["Bacteria", "Viruses", "Fungi", "Protists", "Antibiotics", "Disease Transmission", "Immune Response", "Microbial Genetics"]
       }
     ]
   }

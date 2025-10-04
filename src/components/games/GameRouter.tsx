@@ -1,12 +1,17 @@
 import React, { useEffect } from 'react';
 import { GameSelection } from '@/lib/progress';
 import { AlgorithmVisualizer } from './AlgorithmVisualizer';
+import { AlgorithmVisualizer3D } from './AlgorithmVisualizer3D';
 import { DataStructureBuilder } from './DataStructureBuilder';
+import { DataStructure3D } from './DataStructure3D';
 import { CircuitBuilder } from './CircuitBuilder';
+import { CircuitBuilder3D } from './CircuitBuilder3D';
 import { CodeDebugging } from './CodeDebugging';
 import { NetworkSimulator } from './NetworkSimulator';
 import { DatabaseDesigner } from './DatabaseDesigner';
+import { DatabaseDesigner3D } from './DatabaseDesigner3D';
 import { MathEquationSolver } from './MathEquationSolver';
+import { MathVisualizer3D } from './MathVisualizer3D';
 import { PhysicsSimulator } from './PhysicsSimulator';
 import { ChemistryLab } from './ChemistryLab';
 import { BiologyExplorer } from './BiologyExplorer';
@@ -46,7 +51,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
     if (subject === "Computer Science") {
       switch (topic) {
         case "Algorithms":
-          return <AlgorithmVisualizer level={level} onComplete={onComplete} />;
+          return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
         case "Data Structures": {
           // Route different subtopics to distinct games
           if (subtopic?.includes('Arrays')) {
@@ -64,7 +69,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           if (subtopic?.includes('Graphs')) {
             return <GraphPathfinderGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
-          return <DataStructureBuilder level={level} onComplete={onComplete} />;
+          return <DataStructure3D level={level} onComplete={onComplete} />;
         }
         case "Programming":
           if (subtopic?.includes('Syntax') || subtopic?.includes('Debugging')) {
@@ -72,7 +77,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           }
           return <CodeDebugging level={level} onComplete={onComplete} />;
         case "Database Management":
-          return <DatabaseDesigner level={level} onComplete={onComplete} />;
+          return <DatabaseDesigner3D level={level} onComplete={onComplete} />;
         default:
           return <AlgorithmVisualizer level={level} onComplete={onComplete} />;
       }
@@ -82,7 +87,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
     if (subject === "Engineering") {
       switch (topic) {
         case "Digital Logic":
-          return <CircuitBuilder level={level} onComplete={onComplete} />;
+          return <CircuitBuilder3D level={level} onComplete={onComplete} />;
         case "Computer Networks":
           if (subtopic?.includes('Routing') || subtopic?.includes('TCP/IP') || subtopic?.includes('OSI')) {
             return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
@@ -105,7 +110,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
 
     // Mathematics games
     if (subject === "Mathematics") {
-      return <MathEquationSolver level={level} subtopic={subtopic} onComplete={onComplete} />;
+      return <MathVisualizer3D level={level} subtopic={subtopic} onComplete={onComplete} />;
     }
 
     // Physics games

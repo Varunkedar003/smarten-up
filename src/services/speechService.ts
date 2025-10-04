@@ -287,7 +287,17 @@ export class SpeechService {
     return `Tip: Master ${term} by teaching others and tackling challenging problems. Push the boundaries of your understanding.`;
   }
 
+  private currentLevel: string = 'easy';
+
+  private getExplanationByLevel(easy: string, intermediate: string, hard: string): string[] {
+    const lvl = this.currentLevel || 'easy';
+    if (lvl === 'easy') return [easy];
+    if (lvl === 'intermediate') return [intermediate];
+    return [hard];
+  }
+
   private getExplanationText(topic: string, subtopic: string, level: string): string[] {
+    this.currentLevel = level;
     // Keyed hand-crafted content (kept for specific cases)
     const key = `${topic}-${subtopic}-${level}`.toLowerCase().replace(/\s+/g, '-');
     const canned: Record<string, string[]> = {
