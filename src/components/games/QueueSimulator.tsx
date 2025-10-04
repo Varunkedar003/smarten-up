@@ -73,6 +73,7 @@ export const QueueSimulator: React.FC<QueueSimulatorProps> = ({ level, subtopic,
   const [answer, setAnswer] = useState<number[]>([]);
 
   useEffect(() => {
+    if (ops.length === 0) return; // Guard: don't run if ops is empty
     const ans = computeAnswer();
     setAnswer(ans);
     setChoices(optionsFromAnswer(ans));
