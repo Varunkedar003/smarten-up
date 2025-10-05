@@ -12,7 +12,31 @@ export const CircuitBuilder3D: React.FC<CircuitBuilder3DProps> = ({ level, onCom
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
-  const [powered, setPowered] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'AND gate: 1 AND 0 = ?', opts: ['0', '1', 'ERROR'], correct: 0 },
+      { q: 'OR gate: 1 OR 0 = ?', opts: ['1', '0', 'ERROR'], correct: 0 },
+      { q: 'NOT gate: NOT 1 = ?', opts: ['0', '1', 'ERROR'], correct: 0 },
+      { q: 'XOR gate: 1 XOR 1 = ?', opts: ['0', '1', 'ERROR'], correct: 0 },
+      { q: 'NAND gate: 1 NAND 1 = ?', opts: ['0', '1', 'ERROR'], correct: 0 },
+      { q: 'Which gate always outputs 0 when both inputs are 0?', opts: ['AND', 'OR', 'XOR'], correct: 0 },
+      { q: 'Which is a universal logic gate?', opts: ['NAND', 'AND', 'OR'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
+
+  useEffect(() => {
+    generateQuestion();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -70,11 +94,8 @@ export const CircuitBuilder3D: React.FC<CircuitBuilder3DProps> = ({ level, onCom
       requestAnimationFrame(animate);
       gates.forEach((gate, i) => {
         gate.rotation.y += 0.01;
-        if (powered) {
-          (gate.material as THREE.MeshPhongMaterial).emissive.setHex(0x00ff00);
-        } else {
-          (gate.material as THREE.MeshPhongMaterial).emissive.setHex(0x330000);
-        }
+        const brightness = Math.sin(Date.now() * 0.001 + i) * 0.5 + 0.5;
+        (gate.material as THREE.MeshPhongMaterial).emissive.setRGB(0, brightness * 0.5, 0);
       });
       renderer.render(scene, camera);
     };
@@ -82,31 +103,52 @@ export const CircuitBuilder3D: React.FC<CircuitBuilder3DProps> = ({ level, onCom
 
     return () => {
       renderer.dispose();
-      containerRef.current?.removeChild(renderer.domElement);
+      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
     };
-  }, [level, powered]);
+  }, [level]);
 
-  const handlePowerToggle = () => {
-    setPowered(!powered);
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>3D Digital Circuit Builder</span>
-          <span className="text-sm">Score: {score}/{total}</span>
+          <span>3D Digital Logic Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={handlePowerToggle} className="flex-1">
-            {powered ? 'Power OFF' : 'Power ON'}
-          </Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -12,11 +12,38 @@ export const AlgorithmVisualizer3D: React.FC<AlgorithmVisualizer3DProps> = ({ le
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
-  const [sorting, setSorting] = useState(false);
+  const [currentArray, setCurrentArray] = useState<number[]>([]);
+  const [options, setOptions] = useState<number[][]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
   const sceneRef = useRef<{ scene: THREE.Scene; camera: THREE.Camera; renderer: THREE.WebGLRenderer; cubes: THREE.Mesh[] } | null>(null);
+
+  const generateRound = () => {
+    const len = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 9;
+    const arr = Array.from({ length: len }, () => Math.floor(Math.random() * 50) + 1);
+    const sorted = [...arr].sort((a, b) => a - b);
+    
+    // Generate wrong options
+    const wrong1 = [...sorted];
+    if (wrong1.length > 1) {
+      const i = Math.floor(Math.random() * (wrong1.length - 1));
+      [wrong1[i], wrong1[i + 1]] = [wrong1[i + 1], wrong1[i]];
+    }
+    
+    const wrong2 = [...sorted].reverse();
+    
+    const allOptions = [sorted, wrong1, wrong2].sort(() => Math.random() - 0.5);
+    const correctIdx = allOptions.findIndex(opt => JSON.stringify(opt) === JSON.stringify(sorted));
+    
+    setCurrentArray(arr);
+    setOptions(allOptions);
+    setCorrectIndex(correctIdx);
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
+    generateRound();
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0a0a);
@@ -32,14 +59,12 @@ export const AlgorithmVisualizer3D: React.FC<AlgorithmVisualizer3DProps> = ({ le
     scene.add(directionalLight);
 
     const cubes: THREE.Mesh[] = [];
-    const values = Array.from({ length: level === 'easy' ? 5 : level === 'intermediate' ? 8 : 12 }, () => Math.floor(Math.random() * 10) + 1);
-    
-    values.forEach((val, i) => {
-      const geometry = new THREE.BoxGeometry(1, val * 0.5, 1);
+    currentArray.forEach((val, i) => {
+      const geometry = new THREE.BoxGeometry(1, val * 0.1, 1);
       const material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
       const cube = new THREE.Mesh(geometry, material);
-      cube.position.x = (i - values.length / 2) * 1.5;
-      cube.position.y = val * 0.25;
+      cube.position.x = (i - currentArray.length / 2) * 1.5;
+      cube.position.y = val * 0.05;
       scene.add(cube);
       cubes.push(cube);
     });
@@ -61,56 +86,56 @@ export const AlgorithmVisualizer3D: React.FC<AlgorithmVisualizer3DProps> = ({ le
 
     return () => {
       renderer.dispose();
-      containerRef.current?.removeChild(renderer.domElement);
-    };
-  }, [level]);
-
-  const handleSort = async () => {
-    if (!sceneRef.current || sorting) return;
-    setSorting(true);
-    const { cubes } = sceneRef.current;
-    
-    // Bubble sort visualization
-    for (let i = 0; i < cubes.length; i++) {
-      for (let j = 0; j < cubes.length - i - 1; j++) {
-        const h1 = (cubes[j].geometry as THREE.BoxGeometry).parameters.height;
-        const h2 = (cubes[j + 1].geometry as THREE.BoxGeometry).parameters.height;
-        
-        if (h1 > h2) {
-          // Swap positions with animation
-          const x1 = cubes[j].position.x;
-          cubes[j].position.x = cubes[j + 1].position.x;
-          cubes[j + 1].position.x = x1;
-          [cubes[j], cubes[j + 1]] = [cubes[j + 1], cubes[j]];
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
+      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
       }
-    }
-    
-    setSorting(false);
-    setScore(prev => prev + 1);
-    setTotal(prev => prev + 1);
-  };
+    };
+  }, [currentArray, level]);
 
-  const handleComplete = () => {
-    onComplete(score, total || 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) {
+      setScore(prev => prev + 1);
+    }
+    setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateRound();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>3D Sorting Algorithm Visualizer</span>
-          <span className="text-sm">Score: {score}/{total}</span>
+          <span>3D Sorting Algorithm Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={handleSort} disabled={sorting} className="flex-1">
-            {sorting ? 'Sorting...' : 'Sort Array'}
-          </Button>
-          <Button onClick={handleComplete} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Unsorted array: <code>[{currentArray.join(', ')}]</code></p>
+          <p className="text-sm text-muted-foreground">Which option shows the correctly sorted array (ascending)?</p>
+          
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3 text-left"
+                onClick={() => handleAnswer(idx)}
+              >
+                <code className="text-sm">[{option.join(', ')}]</code>
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

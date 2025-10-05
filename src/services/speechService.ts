@@ -73,8 +73,6 @@ export class SpeechService {
   }
 
   async speakExplanation(topic: string, subtopic: string, level: string): Promise<void> {
-    if (!this.isEnabled) return;
-
     const term = (subtopic && subtopic.trim().length > 1 ? subtopic : topic).trim();
     const lvl = (level || 'easy').toLowerCase();
 
@@ -82,42 +80,12 @@ export class SpeechService {
     this.stop();
     this.currentExplanationText = [];
 
-    const speakBatch = (paragraphs: string[]) => {
-      if (!paragraphs || paragraphs.length === 0) return;
-      const speakOne = (text: string, onEnd?: () => void) => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = lvl === 'easy' ? 0.95 : lvl === 'intermediate' ? 0.9 : 0.95;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.75;
-        utterance.lang = 'en-US';
-        const voices = this.synthesis.getVoices();
-        if (voices && voices.length > 0) {
-          const preferred = voices.find(v => v.lang === 'en-US' && (v.name.includes('Google') || v.name.includes('Microsoft') || v.name.toLowerCase().includes('female')))
-            || voices.find(v => v.lang === 'en-US')
-            || voices[0];
-          utterance.voice = preferred;
-        }
-        utterance.onend = () => { onEnd?.(); };
-        this.currentUtterance = utterance;
-        this.synthesis.speak(utterance);
-      };
-
-      let i = 0;
-      const next = () => {
-        if (!this.isEnabled) return;
-        if (i >= paragraphs.length) return;
-        const text = paragraphs[i++];
-        speakOne(text, next);
-      };
-      next();
-    };
-
-    // Enhanced multi-source explanation fetcher
+    // Enhanced multi-source explanation fetcher - fetch immediately without speaking
     try {
       let explanation = await this.fetchComprehensiveExplanation(term, topic, subtopic, level);
       if (explanation && explanation.length > 0) {
         this.notifyExplanationChange(explanation);
-        speakBatch(explanation);
+        // Don't auto-speak, user can read
         return;
       }
     } catch (error) {
@@ -127,7 +95,6 @@ export class SpeechService {
     // Fallback to local generator
     const paragraphs = this.getExplanationText(topic, subtopic, level);
     this.notifyExplanationChange(paragraphs);
-    speakBatch(paragraphs);
   }
 
   private async fetchComprehensiveExplanation(term: string, topic: string, subtopic: string, level: string): Promise<string[]> {

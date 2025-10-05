@@ -12,10 +12,30 @@ export const DataStructure3D: React.FC<DataStructure3DProps> = ({ level, onCompl
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
   const sceneRef = useRef<{ scene: THREE.Scene; camera: THREE.Camera; renderer: THREE.WebGLRenderer; nodes: THREE.Mesh[] } | null>(null);
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'What traversal visits nodes level by level?', opts: ['BFS (Breadth-First)', 'DFS (Depth-First)', 'Inorder', 'Postorder'], correct: 0 },
+      { q: 'In a binary search tree, where is the smallest value?', opts: ['Leftmost node', 'Rightmost node', 'Root node', 'Any leaf'], correct: 0 },
+      { q: 'Which traversal processes left subtree, root, then right?', opts: ['Inorder', 'Preorder', 'Postorder', 'Level-order'], correct: 0 },
+      { q: 'What is the height of a tree with 7 nodes in perfect balance?', opts: ['3', '2', '4', '7'], correct: 1 },
+      { q: 'In preorder traversal, what is processed first?', opts: ['Root', 'Left child', 'Right child', 'Leaves'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
+    generateQuestion();
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a2e);
@@ -85,28 +105,52 @@ export const DataStructure3D: React.FC<DataStructure3DProps> = ({ level, onCompl
 
     return () => {
       renderer.dispose();
-      containerRef.current?.removeChild(renderer.domElement);
+      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
     };
   }, [level]);
 
-  const handleTraverse = () => {
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>3D Binary Tree Visualization</span>
-          <span className="text-sm">Score: {score}/{total}</span>
+          <span>3D Binary Tree Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={handleTraverse} className="flex-1">Traverse Tree</Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
