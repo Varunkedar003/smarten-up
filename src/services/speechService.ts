@@ -247,48 +247,110 @@ export class SpeechService {
       return `Example: Gene expression regulation involves transcription factors binding to promoter sequences, controlling mRNA production rates.`;
     }
 
-    // Generic contextual example
-    if (lvl === 'easy') return `Example: Think of ${term} like something familiar from daily life to make it concrete and memorable.`;
-    if (lvl === 'intermediate') return `Example: ${term} connects to broader patterns in ${topic} - look for relationships and applications.`;
-    return `Example: Advanced ${term} involves analyzing edge cases, optimizations, and theoretical foundations in ${topic}.`;
+    // Generic contextual example with variety
+    const easyExamples = [
+      `Example: Think of ${term} like something familiar from daily life to make it concrete and memorable.`,
+      `Example: Picture ${term} as a simple real-world process. Relate each step to something you already know.`,
+      `Example: Learn ${term} using small, friendly numbers or visuals first, then scale up.`
+    ];
+    const interExamples = [
+      `Example: ${term} connects to broader patterns in ${topic}. Identify inputs, outputs, and constraints.`,
+      `Example: Compare ${term} with a close concept in ${topic}. Note trade-offs and when to use each.`,
+      `Example: Apply ${term} to a medium-size problem and measure time/space to build intuition.`
+    ];
+    const hardExamples = [
+      `Example: Advanced ${term} involves analyzing edge cases, optimizations, and theoretical foundations in ${topic}.`,
+      `Example: For ${term}, reason about worst-case, amortized behaviors, and limiting assumptions.`,
+      `Example: Challenge ${term} with adversarial or randomized inputs to reveal deeper properties.`
+    ];
+
+    if (lvl === 'easy') return this.choose(easyExamples, `${term}-${level}`);
+    if (lvl === 'intermediate') return this.choose(interExamples, `${term}-${level}`);
+    return this.choose(hardExamples, `${term}-${level}`);
   }
 
   private generateLevelAwareTip(term: string, topic: string, subtopic: string, level: string): string {
     const lvl = level.toLowerCase();
     const t = topic.toLowerCase();
+    const seed = `${term}-${topic}-${level}`;
 
-    if (lvl === 'easy') {
-      return `Tip: Start with simple examples of ${term}. Practice one small step at a time, and don't worry about being perfect.`;
-    }
-    
+    const easyTips = [
+      `Tip: Start with simple examples of ${term}. Practice one step at a time.`,
+      `Tip: Summarize ${term} in your own words, then teach it to a friend.`,
+      `Tip: Draw a small diagram for ${term}. Visuals make ideas stick.`
+    ];
+
+    const interTechTips = [
+      `Tip: Code small experiments for ${term}. Compare approaches and trade-offs.`,
+      `Tip: Implement ${term} twice in different ways. Benchmark and reflect.`,
+      `Tip: Review edge cases for ${term} and add tests for each.`
+    ];
+    const interMathTips = [
+      `Tip: Work several problems on ${term}. Spot patterns and invariants.`,
+      `Tip: Re-derive formulas for ${term} from first principles to build intuition.`,
+      `Tip: Translate word problems involving ${term} into equations and diagrams.`
+    ];
+    const interScienceTips = [
+      `Tip: Connect ${term} to a real system. What inputs/outputs and limits exist?`,
+      `Tip: Build a small model of ${term}. Validate it against observations.`,
+      `Tip: Compare ${term} across two contexts and note what changes.`
+    ];
+
+    const hardTechTips = [
+      `Tip: Analyze complexity and edge cases for ${term}. Consider performance bounds.`,
+      `Tip: Explore alternative data models or architectures for ${term}.`,
+      `Tip: Read one paper or RFC about ${term} and summarize key insights.`
+    ];
+    const hardMathTips = [
+      `Tip: Prove a property about ${term}. Formal reasoning unlocks creativity.`,
+      `Tip: Study counterexamples for ${term} to clarify boundaries.`,
+      `Tip: Generalize ${term} to higher dimensions or new constraints.`
+    ];
+    const hardScienceTips = [
+      `Tip: Compare theoretical predictions of ${term} with experimental data.`,
+      `Tip: Identify assumptions behind ${term} and test their impact.`,
+      `Tip: Explore current research directions related to ${term}.`
+    ];
+
+    if (lvl === 'easy') return this.choose(easyTips, seed);
+
     if (lvl === 'intermediate') {
       if (t.includes('computer') || t.includes('programming') || t.includes('engineering')) {
-        return `Tip: Code up examples of ${term} yourself. Compare different approaches and understand the trade-offs.`;
+        return this.choose(interTechTips, seed);
       }
       if (t.includes('math')) {
-        return `Tip: Work through multiple problems with ${term}. Look for patterns and general strategies that apply broadly.`;
+        return this.choose(interMathTips, seed);
       }
       if (t.includes('science') || t.includes('physics') || t.includes('chemistry') || t.includes('biology')) {
-        return `Tip: Connect ${term} to real-world applications. Understanding the 'why' makes the 'how' much clearer.`;
+        return this.choose(interScienceTips, seed);
       }
-      return `Tip: Practice ${term} with varied examples. Build connections between concepts to deepen understanding.`;
+      return this.choose([...interTechTips, ...interMathTips, ...interScienceTips], seed);
     }
 
     // Advanced level
     if (t.includes('computer') || t.includes('programming') || t.includes('engineering')) {
-      return `Tip: Analyze ${term} complexity and edge cases. Consider performance implications and alternative implementations.`;
+      return this.choose(hardTechTips, seed);
     }
     if (t.includes('math')) {
-      return `Tip: Prove key properties of ${term}. Understanding formal foundations enables creative problem-solving.`;
+      return this.choose(hardMathTips, seed);
     }
-    if (t.includes('science')) {
-      return `Tip: Explore current research on ${term}. Compare theoretical models with experimental data and limitations.`;
+    if (t.includes('science') || t.includes('physics') || t.includes('chemistry') || t.includes('biology')) {
+      return this.choose(hardScienceTips, seed);
     }
-    return `Tip: Master ${term} by teaching others and tackling challenging problems. Push the boundaries of your understanding.`;
+    return this.choose([...hardTechTips, ...hardMathTips, ...hardScienceTips], seed);
   }
 
   private currentLevel: string = 'easy';
 
+  // Deterministic picker to vary content per (term + level)
+  private choose(list: string[], seed: string): string {
+    if (list.length === 0) return '';
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = ((h << 5) - h) + seed.charCodeAt(i);
+    const idx = Math.abs(h) % list.length;
+    return list[idx];
+  }
+  
   private getExplanationByLevel(easy: string, intermediate: string, hard: string): string[] {
     const lvl = this.currentLevel || 'easy';
     if (lvl === 'easy') return [easy];

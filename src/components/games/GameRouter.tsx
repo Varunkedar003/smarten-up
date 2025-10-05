@@ -68,8 +68,11 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           if (subtopic?.includes('Bubble') || subtopic?.includes('Quick') || subtopic?.includes('Merge')) {
             return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
           }
-          if (subtopic?.includes('Binary Search') || subtopic?.includes('DFS') || subtopic?.includes('BFS')) {
+          if (subtopic?.includes('Binary Search')) {
             return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('DFS') || subtopic?.includes('BFS') || subtopic?.includes("Dijkstra")) {
+            return <GraphPathfinderGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
         case "Data Structures": {
@@ -128,11 +131,14 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           }
           return <CircuitBuilder3D level={level} onComplete={onComplete} />;
         case "Computer Networks":
-          if (subtopic?.includes('Routing') || subtopic?.includes('TCP/IP') || subtopic?.includes('OSI')) {
-            return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
-          }
-          if (subtopic?.includes('Network Security') || subtopic?.includes('Firewalls')) {
+          if (subtopic?.includes('OSI') || subtopic?.includes('DNS')) {
             return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Network Security') || subtopic?.includes('Firewalls') || subtopic?.includes('VPN')) {
+            return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Routing') || subtopic?.includes('TCP/IP') || subtopic?.includes('Wireless')) {
+            return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
         case "Software Engineering":
