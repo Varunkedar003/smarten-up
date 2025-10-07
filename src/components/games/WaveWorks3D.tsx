@@ -13,7 +13,29 @@ export const WaveWorks3D: React.FC<WaveWorks3DProps> = ({ level, subtopic, onCom
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
-  const [frequency, setFrequency] = useState(1);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'What is the formula for wave speed?', opts: ['v = fλ', 'v = ma', 'v = d/t'], correct: 0 },
+      { q: 'What is wavelength?', opts: ['Distance between peaks', 'Wave height', 'Wave speed'], correct: 0 },
+      { q: 'What is frequency?', opts: ['Waves per second', 'Wave height', 'Wave speed'], correct: 0 },
+      { q: 'What is amplitude?', opts: ['Wave height', 'Wavelength', 'Frequency'], correct: 0 },
+      { q: 'What type of wave is sound?', opts: ['Longitudinal', 'Transverse', 'Torsional'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
+
+  useEffect(() => {
+    generateQuestion();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -43,32 +65,13 @@ export const WaveWorks3D: React.FC<WaveWorks3DProps> = ({ level, subtopic, onCom
     wave.rotation.x = -Math.PI / 3;
     scene.add(wave);
 
-    // Add particles for wave fronts
-    const particleCount = 200;
-    const particleGeometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-    }
-    
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particleMaterial = new THREE.PointsMaterial({ 
-      color: 0x00ffff,
-      size: 0.1
-    });
-    const particles = new THREE.Points(particleGeometry, particleMaterial);
-    scene.add(particles);
-
     camera.position.set(0, 8, 15);
     camera.lookAt(0, 0, 0);
 
     let time = 0;
     const animate = () => {
       requestAnimationFrame(animate);
-      time += 0.02 * frequency;
+      time += 0.02;
       
       // Animate wave
       const positions = waveGeometry.attributes.position;
@@ -79,37 +82,58 @@ export const WaveWorks3D: React.FC<WaveWorks3DProps> = ({ level, subtopic, onCom
       }
       positions.needsUpdate = true;
       
-      particles.rotation.y += 0.001;
-      
       renderer.render(scene, camera);
     };
     animate();
 
     return () => {
       renderer.dispose();
-      containerRef.current?.removeChild(renderer.domElement);
+      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
     };
-  }, [level, frequency]);
+  }, [level]);
 
-  const increaseFrequency = () => {
-    setFrequency(prev => Math.min(5, prev + 0.5));
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>🌊 WaveWorks 3D</span>
-          <span className="text-sm">Frequency: {frequency.toFixed(1)}Hz | Score: {score}/{total}</span>
+          <span>🌊 Wave Physics Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={increaseFrequency} className="flex-1">Increase Frequency</Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

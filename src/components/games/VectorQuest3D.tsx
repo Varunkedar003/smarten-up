@@ -13,6 +13,29 @@ export const VectorQuest3D: React.FC<VectorQuest3DProps> = ({ level, subtopic, o
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'What is a vector?', opts: ['Magnitude and direction', 'Just magnitude', 'Just direction'], correct: 0 },
+      { q: 'What is the dot product used for?', opts: ['Finding angle', 'Cross product', 'Addition'], correct: 0 },
+      { q: 'What is vector magnitude?', opts: ['Length/size', 'Direction', 'Components'], correct: 0 },
+      { q: 'How to add vectors?', opts: ['Add components', 'Multiply', 'Divide'], correct: 0 },
+      { q: 'What is a unit vector?', opts: ['Magnitude of 1', 'Magnitude of 0', 'Infinite magnitude'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
+
+  useEffect(() => {
+    generateQuestion();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -105,24 +128,46 @@ export const VectorQuest3D: React.FC<VectorQuest3DProps> = ({ level, subtopic, o
     };
   }, [level]);
 
-  const addVector = () => {
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>📐 Vector Quest 3D</span>
-          <span className="text-sm">Score: {score}/{total}</span>
+          <span>📐 Vector Mathematics Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={addVector} className="flex-1">Add Vector</Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

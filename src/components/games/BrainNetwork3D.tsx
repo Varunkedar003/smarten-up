@@ -13,6 +13,29 @@ export const BrainNetwork3D: React.FC<BrainNetwork3DProps> = ({ level, subtopic,
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'What carries signals between neurons?', opts: ['Synapse', 'Axon', 'Dendrite'], correct: 0 },
+      { q: 'What is the main cell of the nervous system?', opts: ['Neuron', 'Muscle cell', 'Blood cell'], correct: 0 },
+      { q: 'What protects the axon?', opts: ['Myelin sheath', 'Synapse', 'Nucleus'], correct: 0 },
+      { q: 'What receives signals in a neuron?', opts: ['Dendrites', 'Axon', 'Cell body'], correct: 0 },
+      { q: 'What is a neurotransmitter?', opts: ['Chemical messenger', 'Electrical signal', 'Cell membrane'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
+
+  useEffect(() => {
+    generateQuestion();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -110,24 +133,46 @@ export const BrainNetwork3D: React.FC<BrainNetwork3DProps> = ({ level, subtopic,
     };
   }, [level]);
 
-  const activateNeuron = () => {
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>🧠 Brain Network 3D</span>
-          <span className="text-sm">Score: {score}/{total}</span>
+          <span>🧠 Neuroscience Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={activateNeuron} className="flex-1">Activate Neural Path</Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

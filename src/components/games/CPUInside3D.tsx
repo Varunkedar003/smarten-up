@@ -12,7 +12,29 @@ export const CPUInside3D: React.FC<CPUInside3DProps> = ({ level, onComplete }) =
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
-  const [instructions, setInstructions] = useState(10);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'What does ALU stand for?', opts: ['Arithmetic Logic Unit', 'Advanced Logic Unit', 'Array Logic Unit'], correct: 0 },
+      { q: 'What does the Control Unit do?', opts: ['Coordinates operations', 'Stores data', 'Does math'], correct: 0 },
+      { q: 'Where are temporary values stored?', opts: ['Registers', 'Hard drive', 'RAM'], correct: 0 },
+      { q: 'What is the instruction cycle?', opts: ['Fetch-Decode-Execute', 'Read-Write-Store', 'Load-Save-Exit'], correct: 0 },
+      { q: 'What is clock speed measured in?', opts: ['Hz (Hertz)', 'Bytes', 'Bits'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
+
+  useEffect(() => {
+    generateQuestion();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -86,25 +108,46 @@ export const CPUInside3D: React.FC<CPUInside3DProps> = ({ level, onComplete }) =
     };
   }, [level]);
 
-  const executeInstruction = () => {
-    setInstructions(prev => Math.max(0, prev - 1));
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>⚙️ CPU Inside 3D</span>
-          <span className="text-sm">Instructions: {instructions} | Score: {score}/{total}</span>
+          <span>⚙️ CPU Architecture Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={executeInstruction} className="flex-1">Execute Instruction</Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

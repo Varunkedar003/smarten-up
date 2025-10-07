@@ -13,7 +13,29 @@ export const ReactionChamber3D: React.FC<ReactionChamber3DProps> = ({ level, sub
   const containerRef = useRef<HTMLDivElement>(null);
   const [score, setScore] = useState(0);
   const [total, setTotal] = useState(0);
-  const [temperature, setTemperature] = useState(25);
+  const [question, setQuestion] = useState('');
+  const [options, setOptions] = useState<string[]>([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [roundsPlayed, setRoundsPlayed] = useState(0);
+  const maxRounds = level === 'easy' ? 5 : level === 'intermediate' ? 7 : 10;
+
+  const generateQuestion = () => {
+    const questions = [
+      { q: 'What speeds up a reaction?', opts: ['Catalyst', 'Inhibitor', 'Water'], correct: 0 },
+      { q: 'What is equilibrium?', opts: ['Forward = Reverse rate', 'No reaction', 'Only forward'], correct: 0 },
+      { q: 'What is activation energy?', opts: ['Energy to start reaction', 'Product energy', 'Total energy'], correct: 0 },
+      { q: 'What happens when you heat a reaction?', opts: ['Usually speeds up', 'Always slows down', 'No effect'], correct: 0 },
+      { q: 'What is an exothermic reaction?', opts: ['Releases heat', 'Absorbs heat', 'No heat change'], correct: 0 },
+    ];
+    const selected = questions[Math.floor(Math.random() * questions.length)];
+    setQuestion(selected.q);
+    setOptions(selected.opts);
+    setCorrectIndex(selected.correct);
+  };
+
+  useEffect(() => {
+    generateQuestion();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -78,7 +100,7 @@ export const ReactionChamber3D: React.FC<ReactionChamber3DProps> = ({ level, sub
     const animate = () => {
       requestAnimationFrame(animate);
       
-      const speed = 1 + (temperature / 100);
+      const speed = 1.5;
       
       molecules.forEach(molecule => {
         molecule.position.add(molecule.userData.velocity.multiplyScalar(speed));
@@ -109,29 +131,52 @@ export const ReactionChamber3D: React.FC<ReactionChamber3DProps> = ({ level, sub
 
     return () => {
       renderer.dispose();
-      containerRef.current?.removeChild(renderer.domElement);
+      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
     };
-  }, [level, temperature]);
+  }, [level]);
 
-  const heatReaction = () => {
-    setTemperature(prev => Math.min(200, prev + 25));
-    setScore(prev => prev + 1);
+  const handleAnswer = (selectedIndex: number) => {
+    const correct = selectedIndex === correctIndex;
+    if (correct) setScore(prev => prev + 1);
     setTotal(prev => prev + 1);
+    
+    const newRounds = roundsPlayed + 1;
+    setRoundsPlayed(newRounds);
+    
+    if (newRounds >= maxRounds) {
+      onComplete(score + (correct ? 1 : 0), total + 1);
+    } else {
+      generateQuestion();
+    }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>⚗️ Reaction Chamber 3D</span>
-          <span className="text-sm">Temp: {temperature}°C | Score: {score}/{total}</span>
+          <span>⚗️ Chemical Reactions Challenge</span>
+          <span className="text-sm">Score: {score}/{total} • Round {roundsPlayed + 1}/{maxRounds}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div ref={containerRef} className="w-full h-[400px] rounded-lg overflow-hidden border-2 border-primary/20" />
-        <div className="flex gap-2">
-          <Button onClick={heatReaction} className="flex-1">Heat Reaction</Button>
-          <Button onClick={() => onComplete(score, total || 1)} variant="outline">Complete</Button>
+        <div ref={containerRef} className="w-full h-[300px] rounded-lg overflow-hidden border-2 border-primary/20" />
+        
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{question}</p>
+          <div className="grid gap-2 pt-2">
+            {options.map((option, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                className="justify-start h-auto py-3"
+                onClick={() => handleAnswer(idx)}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
