@@ -106,15 +106,26 @@ export const GamePlayer = () => {
                     <span className="text-2xl">💡</span>
                     Background Explanation
                   </CardTitle>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => speechService.stop()}
-                    className="h-8 w-8 p-0 hover:bg-destructive/10"
-                    title="Stop audio"
-                  >
-                    <VolumeX className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => speechService.speak(explanationText.join(' '))}
+                      className="h-8 w-8 p-0 hover:bg-primary/10"
+                      title="Play audio"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => speechService.stop()}
+                      className="h-8 w-8 p-0 hover:bg-destructive/10"
+                      title="Stop audio"
+                    >
+                      <VolumeX className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Level: <span className="font-semibold capitalize">{selection.level}</span>

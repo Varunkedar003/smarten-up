@@ -44,6 +44,7 @@ import { BrainNetwork3D } from './BrainNetwork3D';
 import { StackSort3D } from './StackSort3D';
 import { TreeTraversal3D } from './TreeTraversal3D';
 import { PacketRouter3D } from './PacketRouter3D';
+import { ArraySort3D } from './ArraySort3D';
 import { speechService } from '@/services/speechService';
 
 interface GameRouterProps {
@@ -80,7 +81,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
         case "Data Structures": {
           if (subtopic?.includes('Arrays')) {
-            return <ArrayArrangeGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <ArraySort3D level={level} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Stacks')) {
             return <StackSort3D level={level} onComplete={onComplete} />;
@@ -135,10 +136,10 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
           return <CircuitBuilder3D level={level} onComplete={onComplete} />;
         case "Computer Networks":
           if (subtopic?.includes('OSI') || subtopic?.includes('DNS')) {
-            return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <PacketRouter3D level={level} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Network Security') || subtopic?.includes('Firewalls') || subtopic?.includes('VPN')) {
-            return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <PacketRouter3D level={level} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Routing') || subtopic?.includes('TCP/IP') || subtopic?.includes('Wireless')) {
             return <PacketRouter3D level={level} onComplete={onComplete} />;
