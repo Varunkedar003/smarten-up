@@ -41,6 +41,9 @@ import { WaveWorks3D } from './WaveWorks3D';
 import { VectorQuest3D } from './VectorQuest3D';
 import { ReactionChamber3D } from './ReactionChamber3D';
 import { BrainNetwork3D } from './BrainNetwork3D';
+import { StackSort3D } from './StackSort3D';
+import { TreeTraversal3D } from './TreeTraversal3D';
+import { PacketRouter3D } from './PacketRouter3D';
 import { speechService } from '@/services/speechService';
 
 interface GameRouterProps {
@@ -80,13 +83,13 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
             return <ArrayArrangeGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Stacks')) {
-            return <StackSimulatorGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <StackSort3D level={level} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Queues')) {
             return <QueueSimulator level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Trees') || subtopic?.includes('AVL')) {
-            return <TreeTraversalGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <TreeTraversal3D level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Graphs')) {
             return <GraphPathfinderGame level={level} subtopic={subtopic} onComplete={onComplete} />;
@@ -138,7 +141,7 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
             return <PacketSimulationGame level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Routing') || subtopic?.includes('TCP/IP') || subtopic?.includes('Wireless')) {
-            return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <PacketRouter3D level={level} onComplete={onComplete} />;
           }
           return <NetworkSimulator3D level={level} subtopic={subtopic} onComplete={onComplete} />;
         case "Software Engineering":
