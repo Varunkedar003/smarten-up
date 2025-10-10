@@ -45,6 +45,15 @@ import { StackSort3D } from './StackSort3D';
 import { TreeTraversal3D } from './TreeTraversal3D';
 import { PacketRouter3D } from './PacketRouter3D';
 import { ArraySort3D } from './ArraySort3D';
+import { BubbleUpArena3D } from './BubbleUpArena3D';
+import { PivotQuest3D } from './PivotQuest3D';
+import { MergeFactory3D } from './MergeFactory3D';
+import { MazeExplorer3D } from './MazeExplorer3D';
+import { CityRescuer3D } from './CityRescuer3D';
+import { ShortestPathRacer3D } from './ShortestPathRacer3D';
+import { ChainConnect3D } from './ChainConnect3D';
+import { BoxTowerChallenge3D } from './BoxTowerChallenge3D';
+import { AirportRunway3D } from './AirportRunway3D';
 import { speechService } from '@/services/speechService';
 
 interface GameRouterProps {
@@ -69,25 +78,40 @@ export const GameRouter: React.FC<GameRouterProps> = ({ selection, onComplete })
     if (subject === "Computer Science") {
       switch (topic) {
         case "Algorithms":
-          if (subtopic?.includes('Bubble') || subtopic?.includes('Quick') || subtopic?.includes('Merge')) {
-            return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
+          if (subtopic?.includes('Bubble')) {
+            return <BubbleUpArena3D level={level} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Quick')) {
+            return <PivotQuest3D level={level} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('Merge')) {
+            return <MergeFactory3D level={level} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Binary Search')) {
             return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
           }
-          if (subtopic?.includes('DFS') || subtopic?.includes('BFS') || subtopic?.includes("Dijkstra")) {
-            return <GraphPathfinderGame level={level} subtopic={subtopic} onComplete={onComplete} />;
+          if (subtopic?.includes('DFS')) {
+            return <MazeExplorer3D level={level} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes('BFS')) {
+            return <CityRescuer3D level={level} onComplete={onComplete} />;
+          }
+          if (subtopic?.includes("Dijkstra")) {
+            return <ShortestPathRacer3D level={level} onComplete={onComplete} />;
           }
           return <AlgorithmVisualizer3D level={level} onComplete={onComplete} />;
         case "Data Structures": {
           if (subtopic?.includes('Arrays')) {
             return <ArraySort3D level={level} onComplete={onComplete} />;
           }
+          if (subtopic?.includes('Linked')) {
+            return <ChainConnect3D level={level} onComplete={onComplete} />;
+          }
           if (subtopic?.includes('Stacks')) {
-            return <StackSort3D level={level} onComplete={onComplete} />;
+            return <BoxTowerChallenge3D level={level} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Queues')) {
-            return <QueueSimulator level={level} subtopic={subtopic} onComplete={onComplete} />;
+            return <AirportRunway3D level={level} subtopic={subtopic} onComplete={onComplete} />;
           }
           if (subtopic?.includes('Trees') || subtopic?.includes('AVL')) {
             return <TreeTraversal3D level={level} subtopic={subtopic} onComplete={onComplete} />;

@@ -28,7 +28,6 @@ export const GamePlayer = () => {
 
   const [finished, setFinished] = useState(false);
   const [explanationText, setExplanationText] = useState<string[]>([]);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const unsubscribe = speechService.onExplanationChange((text) => {
@@ -85,17 +84,7 @@ export const GamePlayer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            {ready ? (
-              <GameRouter selection={selection} onComplete={onComplete} />
-            ) : (
-              <Card className="p-6 h-full flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <h2 className="text-xl font-semibold">Study first, then play</h2>
-                  <p className="text-muted-foreground">Read or listen to the explanation on the right, then start the game.</p>
-                  <Button onClick={() => setReady(true)}>Start Game</Button>
-                </div>
-              </Card>
-            )}
+            <GameRouter selection={selection} onComplete={onComplete} />
           </div>
           
           <div className="lg:col-span-1 space-y-4">
